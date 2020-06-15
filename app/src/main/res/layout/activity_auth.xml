@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:facebook="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/auth_activity_constraint_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#fff"
+    tools:context=".AuthActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        facebook:layout_constraintBottom_toBottomOf="parent"
+        facebook:layout_constraintEnd_toEndOf="parent"
+        facebook:layout_constraintStart_toStartOf="parent"
+        facebook:layout_constraintTop_toTopOf="parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- IMAGE VIEW GO4LUNCH -->
+            <ImageView
+                android:id="@+id/auth_activity_logo"
+                android:layout_width="180dip"
+                android:layout_height="180dip"
+                android:layout_gravity="center_horizontal"
+                android:background="@drawable/logo_app"
+                android:contentDescription="@string/main_activity_logo" />
+            <!-- TITLE GO4LUNCH -->
+            <TextView
+                android:id="@+id/auth_activity_title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:text="@string/app_name"
+                android:textColor="@color/colorPrimary"
+                android:textSize="64sp"
+                android:textStyle="bold" />
+            <!-- DESCRIPTION GO4LUNCH -->
+            <TextView
+                android:id="@+id/auth_activity_description"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_horizontal"
+                android:layout_marginBottom="50dp"
+                android:text="@string/main_activity_description"
+                android:textAlignment="center"
+                android:textColor="@color/colorPrimary"
+                android:textSize="16sp"
+                android:textStyle="italic" />
+
+            <!-- BUTTON FACEBOOK -->
+            <Button
+                android:id="@+id/auth_activity_button_login_facebook"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="30dp"
+                android:layout_marginVertical="10dp"
+                android:background="@drawable/shape_facebook"
+                android:drawableStart="@drawable/logo_facebook"
+                android:padding="15dp"
+                android:text="@string/button_login_facebook"
+                android:textColor="#fff"
+                android:textSize="16sp" />
+            <!-- BUTTON GOOGLE -->
+            <Button
+                android:id="@+id/auth_activity_button_login_google"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="30dp"
+                android:layout_marginVertical="10dp"
+                android:background="@drawable/shape_google"
+                android:drawableStart="@drawable/logo_google"
+                android:padding="15dp"
+                android:text="@string/button_login_google"
+                android:textColor="#fff"
+                android:textSize="16sp" />
+            <!-- BUTTON TWITTER -->
+            <Button
+                android:id="@+id/auth_activity_button_login_twitter"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="30dp"
+                android:layout_marginVertical="10dp"
+                android:background="@drawable/shape_twitter"
+                android:drawableStart="@drawable/logo_twitter"
+                android:padding="15dp"
+                android:text="@string/button_login_twitter"
+                android:textColor="#fff"
+                android:textSize="16sp" />
+        </LinearLayout>
+    </ScrollView>
+</androidx.constraintlayout.widget.ConstraintLayout>

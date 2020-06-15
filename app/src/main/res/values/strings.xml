@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">Go4Lunch</string>
+
+    <string name="facebook_app_id" translatable="false">747782012628133</string>
+    <string name="fb_login_protocol_scheme" translatable="false">fb747782012628133</string>
+
+    <string name="main_activity_description">Trouver un restaurant et inviter vos collègues pour déjeuner !</string>
+    <string name="main_activity_logo">Logo de l\'application</string>
+
+    <string name="button_login_facebook">Se connecter avec Facebook</string>
+    <string name="button_login_google">Se connecter avec Google</string>
+    <string name="button_login_twitter">Se connecter avec Twitter</string>
+
+    <string name="connection_succeed">Authentification réussie !</string>
+    <string name="error_authentication_canceled">Authentification annulée…</string>
+    <string name="error_no_internet">Aucune connexion internet !</string>
+    <string name="error_unknown_error">Une erreur inconnue s\'est produite…</string>
 </resources>
