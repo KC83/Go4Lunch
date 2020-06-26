@@ -17,7 +17,6 @@ public class MainActivity extends AppCompatActivity {
 
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         if (currentUser == null) {
-            Log.d("TAG", "MainActivity::currentUser is null");
             startAuthActivity();
         } else {
             Log.d("TAG", "MainActivity::currentUser is not null");
