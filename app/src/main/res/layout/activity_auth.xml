@@ -29,7 +29,7 @@
                 android:layout_width="180dip"
                 android:layout_height="180dip"
                 android:layout_gravity="center_horizontal"
-                android:background="@drawable/logo_app"
+                android:background="@drawable/ic_launcher_foreground"
                 android:contentDescription="@string/main_activity_logo" />
             <!-- TITLE GO4LUNCH -->
             <TextView

@@ -25,9 +25,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 android:background="@color/colorPrimary"
-                app:titleTextColor="@color/colorAccentDark"
-                android:theme="@style/ThemeOverlay.AppCompat.Light"
-                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:titleTextColor="@color/colorAccent"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Dark"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"/>
