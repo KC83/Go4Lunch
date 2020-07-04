@@ -9,6 +9,7 @@
     <string name="twitter_consumer_key" translatable="false">NTbH0g3azUXET9RTnfXe1Gjhh</string>
     <string name="twitter_consumer_secret" translatable="false">6rg4jMUjRtYaAsA8cyoRL8PzKGTQSifQoPrK2JAEc9GOkfOiEA</string>
 
+    <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
 
     <string name="main_activity_description">Trouver un restaurant et inviter vos collègues pour déjeuner !</string>
     <string name="main_activity_logo">Logo de l\'application</string>
@@ -27,7 +28,8 @@
     <string name="map_view">Carte</string>
     <string name="list_view">Liste</string>
     <string name="workmates">Collègues</string>
-
-
-    <string name="hello_blank_fragment" translatable="false">Hello blank fragment</string>
+    <string name="search">Recherche</string>
+    <string name="toolbar_search_restaurant">Recherche des restaurants</string>
+    <string name="toolbar_search_workmates">Recherche des collègues</string>
+    <string name="profile_picture">Image de profil</string>
 </resources>

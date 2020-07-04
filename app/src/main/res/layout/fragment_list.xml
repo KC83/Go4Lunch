@@ -7,7 +7,6 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@android:color/holo_green_light"
         android:text="@string/list_view" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

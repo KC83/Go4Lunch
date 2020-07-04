@@ -10,12 +10,20 @@ import androidx.fragment.app.Fragment;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.text.TextUtils;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.ProgressBar;
+import android.widget.SearchView;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
@@ -27,6 +35,7 @@ import com.kcapp.go4lunch.fragment.WorkmatesFragment;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private DrawerLayout mDrawerLayout;
+    private FirebaseUser mFirebaseUser;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,26 +43,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         // Get connected user
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser == null) {
+        mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (mFirebaseUser == null) {
             startAuthActivity();
         } else {
-            Toolbar toolbar = findViewById(R.id.toolbar);
-            setSupportActionBar(toolbar);
-
-            mDrawerLayout = findViewById(R.id.drawer_layout);
-
-            ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-            mDrawerLayout.addDrawerListener(toggle);
-            toggle.syncState();
-
+            // Init the navigation drawer
+            initNavigationDrawer();
             // Init the bottom navigation
             initBottonNavigationView();
+
             // Set default fragment when the app is open
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new MapFragment()).commit();
-
-            NavigationView navigationView = findViewById(R.id.nav_view);
-            navigationView.setNavigationItemSelectedListener(this);
         }
     }
 
@@ -66,12 +67,75 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.nav_lunch:
+                System.out.println("MainActivity :: onOptionsItemSelected :: nav_lunch");
+                mDrawerLayout.closeDrawer(GravityCompat.START);
+                return true;
+            case R.id.nav_settings:
+                System.out.println("MainActivity :: onOptionsItemSelected :: nav_settings");
+                mDrawerLayout.closeDrawer(GravityCompat.START);
+                return true;
+            case R.id.nav_logout:
+                System.out.println("MainActivity :: onOptionsItemSelected :: nav_logout");
+                mDrawerLayout.closeDrawer(GravityCompat.START);
+                signOutFromFirebase();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar_menu, menu);
+        MenuItem menuItem = menu.findItem(R.id.toolbar_search);
+        SearchView searchView = (SearchView) menuItem.getActionView();
+        searchView.setQueryHint("Recherche");
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
     /**
      * Open the authentication page
      */
     private void startAuthActivity() {
         Intent intent = new Intent(this, AuthActivity.class);
         startActivity(intent);
+    }
+
+    /**
+     * Init the navigation drawer
+     */
+    private void initNavigationDrawer() {
+        Toolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(this, mDrawerLayout, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        mDrawerLayout.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+
+        View headerView = navigationView.getHeaderView(0);
+        ImageView navPicture = headerView.findViewById(R.id.nav_picture);
+        TextView navName = headerView.findViewById(R.id.nav_name);
+        TextView navEmail = headerView.findViewById(R.id.nav_email);
+
+        //Get picture URL from Firebase
+        if (mFirebaseUser.getPhotoUrl() != null) {
+            Glide.with(this)
+                    .load(mFirebaseUser.getPhotoUrl())
+                    .apply(RequestOptions.circleCropTransform())
+                    .into(navPicture);
+        }
+        navName.setText(TextUtils.isEmpty(mFirebaseUser.getDisplayName()) ? "Pas de nom" : mFirebaseUser.getDisplayName());
+        navEmail.setText(TextUtils.isEmpty(mFirebaseUser.getEmail()) ? "Pas d'email" : mFirebaseUser.getEmail());
     }
 
     /**
@@ -112,29 +176,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void signOutFromFirebase() {
         System.out.println("MainActivity :: signOutFromFirebase");
 
-        AuthUI.getInstance().signOut(this).addOnSuccessListener(this, new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-                startAuthActivity();
-            }
-        });
-    }
+        ProgressBar progressBar = findViewById(R.id.progress_bar);
+        progressBar.setVisibility(View.VISIBLE);
 
-    @Override
-    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.nav_lunch:
-                System.out.println("MainActivity :: onOptionsItemSelected :: nav_lunch");
-                return true;
-            case R.id.nav_settings:
-                System.out.println("MainActivity :: onOptionsItemSelected :: nav_settings");
-                return true;
-            case R.id.nav_logout:
-                System.out.println("MainActivity :: onOptionsItemSelected :: nav_logout");
-                signOutFromFirebase();
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
-        }
+        AuthUI.getInstance().signOut(this)
+            .addOnSuccessListener(this, new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    startAuthActivity();
+                }
+            })
+            .addOnFailureListener(this, new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    ProgressBar progressBar = findViewById(R.id.progress_bar);
+                    progressBar.setVisibility(View.INVISIBLE);
+                    Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_LONG).show();
+                }
+            });
     }
 }
