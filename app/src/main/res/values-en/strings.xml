@@ -22,4 +22,5 @@
     <string name="toolbar_search_restaurant">Search restaurants</string>
     <string name="toolbar_search_workmates">Search workmates</string>
     <string name="profile_picture">Profile picture</string>
+    <string name="google_current_location">I am here</string>
 </resources>

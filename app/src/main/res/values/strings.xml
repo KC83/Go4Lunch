@@ -32,4 +32,5 @@
     <string name="toolbar_search_restaurant">Recherche des restaurants</string>
     <string name="toolbar_search_workmates">Recherche des collègues</string>
     <string name="profile_picture">Image de profil</string>
+    <string name="google_current_location">I am here</string>
 </resources>
