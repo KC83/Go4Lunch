@@ -23,4 +23,5 @@
     <string name="toolbar_search_workmates">Search workmates</string>
     <string name="profile_picture">Profile picture</string>
     <string name="google_current_location">I am here</string>
+    <string name="permission_denied">Permission denied</string>
 </resources>

@@ -23,12 +23,17 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+
 import com.kcapp.go4lunch.R;
+import com.kcapp.go4lunch.api.places.GetPlacesData;
 
 public class MapFragment extends Fragment {
+    GoogleMap mMap;
+    Double mLat, mLng;
     SupportMapFragment mMapFragment;
     FusedLocationProviderClient mClient;
 
+    int PROXIMITY_RADIUS = 10000;
 
     private OnMapReadyCallback callback = new OnMapReadyCallback() {
 
@@ -43,7 +48,11 @@ public class MapFragment extends Fragment {
          */
         @Override
         public void onMapReady(GoogleMap googleMap) {
-            LatLng sydney = new LatLng(-34, 151);
+            mMap = googleMap;
+            mLat = Double.parseDouble("-34");
+            mLng = Double.parseDouble("151");
+
+            LatLng sydney = new LatLng(mLat, mLng);
             googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
             googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
@@ -71,9 +80,14 @@ public class MapFragment extends Fragment {
             mClient = LocationServices.getFusedLocationProviderClient(this.getContext());
             // Get the current location
             getCurrentLocation();
+            // Get places
+            getPlaces();
         }
     }
 
+    /**
+     * Get the current locacation of the user
+     */
     private void getCurrentLocation() {
         // Check context
         if (this.getContext() == null) {
@@ -95,18 +109,56 @@ public class MapFragment extends Fragment {
                     mMapFragment.getMapAsync(new OnMapReadyCallback() {
                         @Override
                         public void onMapReady(GoogleMap googleMap) {
+                            mMap = googleMap;
+                            mLat = location.getLatitude();
+                            mLng = location.getLongitude();
+
                             // Initialize lat lng
-                            LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+                            LatLng latLng = new LatLng(mLat, mLng);
+
                             // Create marker options
-                            MarkerOptions markerOptions = new MarkerOptions().position(latLng).title(String.valueOf(R.string.google_current_location));
+                            MarkerOptions markerOptions = new MarkerOptions().position(latLng);
+
                             // Zoom map
-                            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(latLng,10));
+                            googleMap.addMarker(new MarkerOptions().position(latLng)).setVisible(true);
+                            // Move the camera instantly to location with a zoom of 15.
+                            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+                            // Zoom in, animating the camera.
+                            googleMap.animateCamera(CameraUpdateFactory.zoomTo(14), 2000, null);
+
                             // Add marker on map
                             googleMap.addMarker(markerOptions);
+                            // Move map
+                            googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                         }
                     });
                 }
             }
         });
+    }
+
+    //*** PLACES ***//
+    private void getPlaces() {
+        Object[] dataTransfer = new Object[2];
+        GetPlacesData getPlacesData = new GetPlacesData();
+
+        if (mMap == null) {
+            return;
+        }
+
+        mMap.clear();
+        String resturant = "restuarant";
+        String url = getUrl(mLat, mLng, resturant);
+        dataTransfer[0] = mMap;
+        dataTransfer[1] = url;
+
+        getPlacesData.execute(dataTransfer);
+    }
+    private String getUrl(double latitude , double longitude , String nearbyPlace) {
+        return "https://maps.googleapis.com/maps/api/place/nearbysearch/json?" + "location=" + latitude + "," + longitude +
+                "&radius=" + PROXIMITY_RADIUS +
+                "&type=" + nearbyPlace +
+                "&sensor=true" +
+                "&key=" + getString(R.string.google_maps_key);
     }
 }
