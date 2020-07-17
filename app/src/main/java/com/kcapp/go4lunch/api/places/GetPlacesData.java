@@ -43,7 +43,14 @@ public class GetPlacesData extends AsyncTask<Object, String, String> {
         showPlaces(placeList);
     }
 
+    /**
+     * Show places on map
+     * @param placeList list of places near the user's current location
+     */
     private void showPlaces(List<HashMap<String, String>> placeList) {
+        if (placeList.size() == 0) {
+            return;
+        }
         for(int i = 0; i < placeList.size(); i++) {
             MarkerOptions markerOptions = new MarkerOptions();
             // Get a place

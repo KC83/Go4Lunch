@@ -15,16 +15,13 @@ import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.kcapp.go4lunch.api.UserHelper;
 
-import java.util.Arrays;
 import java.util.Collections;
 
 public class AuthActivity extends AppCompatActivity {
-    private ConstraintLayout mConstraintLayout;
     private static final int RC_SIGN_IN = 100;
 
     @Override
@@ -42,29 +39,13 @@ public class AuthActivity extends AppCompatActivity {
     }
 
     private void initButtons() {
-        mConstraintLayout = findViewById(R.id.auth_activity_constraint_layout);
         Button facebookButton = findViewById(R.id.auth_activity_button_login_facebook);
         Button googleButton = findViewById(R.id.auth_activity_button_login_google);
         Button twitterButton = findViewById(R.id.auth_activity_button_login_twitter);
 
-        facebookButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                authWithFacebook();
-            }
-        });
-        googleButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                authWithGoogle();
-            }
-        });
-        twitterButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                authWithTwitter();
-            }
-        });
+        facebookButton.setOnClickListener(v -> authWithFacebook());
+        googleButton.setOnClickListener(v -> authWithGoogle());
+        twitterButton.setOnClickListener(v -> authWithTwitter());
     }
     private void authWithFacebook() {
         Log.d("TAG", "AuthActivity::authWithFacebook");
@@ -106,24 +87,25 @@ public class AuthActivity extends AppCompatActivity {
         Log.d("TAG", "AuthActivity::handleResponseAfterSignIn");
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) { // SUCCESS
-                createUserInFirestore();
-                Snackbar.make(this.mConstraintLayout, getString(R.string.connection_succeed), Snackbar.LENGTH_SHORT).show();
+                createUserInFirebase();
+                Toast.makeText(getApplicationContext(), getString(R.string.connection_succeed), Toast.LENGTH_SHORT).show();
+
 
                 Intent intent = new Intent(this, MainActivity.class);
                 startActivity(intent);
             } else { // ERRORS
                 if (response == null) {
-                    Snackbar.make(this.mConstraintLayout, getString(R.string.error_authentication_canceled), Snackbar.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), getString(R.string.error_authentication_canceled), Toast.LENGTH_SHORT).show();
                 } else if (response.getErrorCode() == ErrorCodes.NO_NETWORK) {
-                    Snackbar.make(this.mConstraintLayout, getString(R.string.error_no_internet), Snackbar.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), getString(R.string.error_no_internet), Toast.LENGTH_SHORT).show();
                 } else if (response.getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
-                    Snackbar.make(this.mConstraintLayout, getString(R.string.error_unknown_error), Snackbar.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_SHORT).show();
                 }
             }
         }
     }
-    private void createUserInFirestore() {
-        Log.d("TAG", "AuthActivity::createUserInFirestore");
+    private void createUserInFirebase() {
+        Log.d("TAG", "AuthActivity::createUserInFirebase");
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         if (currentUser != null) {
@@ -132,12 +114,7 @@ public class AuthActivity extends AppCompatActivity {
             String email = currentUser.getEmail();
             String urlPicture = (currentUser.getPhotoUrl() != null) ? currentUser.getPhotoUrl().toString() : null;
 
-            UserHelper.createUser(uid, username, email, urlPicture).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_LONG).show();
-                }
-            });
+            UserHelper.createUser(uid, username, email, urlPicture).addOnFailureListener(e -> Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_LONG).show());
         }
     }
 }

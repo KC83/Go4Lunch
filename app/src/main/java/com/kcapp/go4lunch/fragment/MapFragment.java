@@ -35,7 +35,7 @@ public class MapFragment extends Fragment {
 
     int PROXIMITY_RADIUS = 10000;
 
-    private OnMapReadyCallback callback = new OnMapReadyCallback() {
+    private OnMapReadyCallback mCallback = new OnMapReadyCallback() {
 
         /**
          * Manipulates the map once available.
@@ -56,6 +56,8 @@ public class MapFragment extends Fragment {
             googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
             googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
+            // Get places
+            getPlaces();
         }
     };
 
@@ -71,7 +73,7 @@ public class MapFragment extends Fragment {
 
         mMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         if (mMapFragment != null) {
-            mMapFragment.getMapAsync(callback);
+            mMapFragment.getMapAsync(mCallback);
         }
 
         // Check context
@@ -101,43 +103,44 @@ public class MapFragment extends Fragment {
 
         // Initialize task location
         Task<Location> task = mClient.getLastLocation();
-        task.addOnSuccessListener(new OnSuccessListener<Location>() {
-            @Override
-            public void onSuccess(final Location location) {
-                // When success
-                if (location != null) {
-                    mMapFragment.getMapAsync(new OnMapReadyCallback() {
-                        @Override
-                        public void onMapReady(GoogleMap googleMap) {
-                            mMap = googleMap;
-                            mLat = location.getLatitude();
-                            mLng = location.getLongitude();
+        task.addOnSuccessListener(location -> {
+            // When success
+            if (location != null) {
+                mMapFragment.getMapAsync(googleMap -> {
+                    mMap = googleMap;
+                    mLat = location.getLatitude();
+                    mLng = location.getLongitude();
 
-                            // Initialize lat lng
-                            LatLng latLng = new LatLng(mLat, mLng);
+                    // Initialize lat lng
+                    LatLng latLng = new LatLng(mLat, mLng);
 
-                            // Create marker options
-                            MarkerOptions markerOptions = new MarkerOptions().position(latLng);
+                    // Create marker options
+                    MarkerOptions markerOptions = new MarkerOptions().position(latLng);
 
-                            // Zoom map
-                            googleMap.addMarker(new MarkerOptions().position(latLng)).setVisible(true);
-                            // Move the camera instantly to location with a zoom of 15.
-                            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
-                            // Zoom in, animating the camera.
-                            googleMap.animateCamera(CameraUpdateFactory.zoomTo(14), 2000, null);
+                    // Zoom map
+                    googleMap.addMarker(new MarkerOptions().position(latLng)).setVisible(true);
+                    // Move the camera instantly to location with a zoom of 15.
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
+                    // Zoom in, animating the camera.
+                    googleMap.animateCamera(CameraUpdateFactory.zoomTo(14), 2000, null);
 
-                            // Add marker on map
-                            googleMap.addMarker(markerOptions);
-                            // Move map
-                            googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-                        }
-                    });
-                }
+                    // Add marker on map
+                    googleMap.addMarker(markerOptions);
+                    // Move map
+                    googleMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+
+                    // Get places
+                    getPlaces();
+                });
             }
         });
     }
 
     //*** PLACES ***//
+
+    /**
+     * Get places
+     */
     private void getPlaces() {
         Object[] dataTransfer = new Object[2];
         GetPlacesData getPlacesData = new GetPlacesData();
@@ -147,18 +150,24 @@ public class MapFragment extends Fragment {
         }
 
         mMap.clear();
-        String resturant = "restuarant";
-        String url = getUrl(mLat, mLng, resturant);
+        String url = getUrl(mLat, mLng);
         dataTransfer[0] = mMap;
         dataTransfer[1] = url;
 
         getPlacesData.execute(dataTransfer);
     }
-    private String getUrl(double latitude , double longitude , String nearbyPlace) {
+
+    /**
+     * Return the URL to recover the places
+     * @param latitude latitude of the user's current location
+     * @param longitude longitude of the user's current location
+     * @return URL
+     */
+    private String getUrl(double latitude, double longitude) {
         return "https://maps.googleapis.com/maps/api/place/nearbysearch/json?" + "location=" + latitude + "," + longitude +
                 "&radius=" + PROXIMITY_RADIUS +
-                "&type=" + nearbyPlace +
+                "&type=restaurant" +
                 "&sensor=true" +
-                "&key=" + getString(R.string.google_maps_key);
+                "&key=" + getString(R.string.google_browser_key);
     }
 }

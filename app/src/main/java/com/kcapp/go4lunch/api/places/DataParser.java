@@ -9,6 +9,11 @@ import java.util.HashMap;
 import java.util.List;
 
 public class DataParser {
+    /**
+     * Return information of a place
+     * @param googlePlaceJson JSON of a place
+     * @return information of a place
+     */
     private HashMap<String, String> getPlace(JSONObject googlePlaceJson) {
         HashMap<String, String> googlePlaceMap = new HashMap<>();
         String placeName = "--NA--";
@@ -39,6 +44,11 @@ public class DataParser {
         return googlePlaceMap;
     }
 
+    /**
+     * Return information from all places
+     * @param jsonArray JSON of places
+     * @return information from all places
+     */
     private List<HashMap<String, String>>getPlaces(JSONArray jsonArray) {
         int count = jsonArray.length();
         List<HashMap<String, String>> placelist = new ArrayList<>();
@@ -55,6 +65,11 @@ public class DataParser {
         return placelist;
     }
 
+    /**
+     * Parse the data sent by google
+     * @param jsonData data sent by google
+     * @return places
+     */
     public List<HashMap<String, String>> parse(String jsonData) {
         JSONArray jsonArray = null;
         JSONObject jsonObject;

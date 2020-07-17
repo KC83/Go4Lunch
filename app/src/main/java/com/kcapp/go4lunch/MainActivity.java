@@ -42,6 +42,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private DrawerLayout mDrawerLayout;
     private FirebaseUser mFirebaseUser;
 
+    public static final int LOCATION_CODE = 1000;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,7 +58,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // Init the navigation drawer
             initNavigationDrawer();
             // Init the bottom navigation
-            initBottonNavigationView();
+            initBottomNavigationView();
 
             // Check permission
             checkLocationPermission();
@@ -149,32 +151,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     /**
      * Init the bottom navigation
      */
-    private void initBottonNavigationView() {
+    private void initBottomNavigationView() {
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.bringToFront();
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                Fragment selectedFragment = null;
+        bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
+            Fragment selectedFragment = null;
 
-                switch (item.getItemId()) {
-                    case R.id.navigation_map_view:
-                        selectedFragment = new MapFragment();
-                        break;
-                    case R.id.navigation_list_view:
-                        selectedFragment = new ListFragment();
-                        break;
-                    case R.id.navigation_workmates:
-                        selectedFragment = new WorkmatesFragment();
-                        break;
-                }
-
-                if (selectedFragment != null) {
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
-                    return true;
-                }
-                return false;
+            switch (item.getItemId()) {
+                case R.id.navigation_map_view:
+                    selectedFragment = new MapFragment();
+                    break;
+                case R.id.navigation_list_view:
+                    selectedFragment = new ListFragment();
+                    break;
+                case R.id.navigation_workmates:
+                    selectedFragment = new WorkmatesFragment();
+                    break;
             }
+
+            if (selectedFragment != null) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
+                return true;
+            }
+            return false;
         });
     }
 
@@ -188,19 +187,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         progressBar.setVisibility(View.VISIBLE);
 
         AuthUI.getInstance().signOut(this)
-            .addOnSuccessListener(this, new OnSuccessListener<Void>() {
-                @Override
-                public void onSuccess(Void aVoid) {
-                    startAuthActivity();
-                }
-            })
-            .addOnFailureListener(this, new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    ProgressBar progressBar = findViewById(R.id.progress_bar);
-                    progressBar.setVisibility(View.INVISIBLE);
-                    Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_LONG).show();
-                }
+            .addOnSuccessListener(this, aVoid -> startAuthActivity())
+            .addOnFailureListener(this, e -> {
+                ProgressBar progressBar1 = findViewById(R.id.progress_bar);
+                progressBar1.setVisibility(View.INVISIBLE);
+                Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_LONG).show();
             });
     }
 
@@ -210,11 +201,24 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private void checkLocationPermission() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // If the user didn't accept the permission
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this, android.Manifest.permission.ACCESS_FINE_LOCATION)) {
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, PackageManager.PERMISSION_GRANTED);
-            } else {
-                ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, PackageManager.PERMISSION_GRANTED);
-            }
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, LOCATION_CODE);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case LOCATION_CODE:
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Set default fragment when the app is open
+                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new MapFragment()).commit();
+                }  else {
+                    Toast.makeText(getApplicationContext(), getString(R.string.permission_denied), Toast.LENGTH_LONG).show();
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         }
     }
 
