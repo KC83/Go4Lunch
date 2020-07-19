@@ -17,12 +17,12 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.kcapp.go4lunch.api.Constants;
 import com.kcapp.go4lunch.api.UserHelper;
 
 import java.util.Collections;
 
 public class AuthActivity extends AppCompatActivity {
-    private static final int RC_SIGN_IN = 100;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,7 +56,7 @@ public class AuthActivity extends AppCompatActivity {
                                 Collections.singletonList(new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()))
                         .setIsSmartLockEnabled(false, true)
                         .build(),
-                RC_SIGN_IN);
+                Constants.RC_SIGN_IN);
     }
     private void authWithGoogle() {
         Log.d("TAG", "AuthActivity::authWithGoogle");
@@ -67,7 +67,7 @@ public class AuthActivity extends AppCompatActivity {
                                 Collections.singletonList(new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()))
                         .setIsSmartLockEnabled(false, true)
                         .build(),
-                RC_SIGN_IN);
+                Constants.RC_SIGN_IN);
     }
     private void authWithTwitter() {
         Log.d("TAG", "AuthActivity::authWithTwitter");
@@ -78,14 +78,14 @@ public class AuthActivity extends AppCompatActivity {
                                 Collections.singletonList(new AuthUI.IdpConfig.Builder(AuthUI.TWITTER_PROVIDER).build()))
                         .setIsSmartLockEnabled(false, true)
                         .build(),
-                RC_SIGN_IN);
+                Constants.RC_SIGN_IN);
     }
 
     private void handleResponseAfterSignIn(int requestCode, int resultCode, Intent data){
         IdpResponse response = IdpResponse.fromResultIntent(data);
 
         Log.d("TAG", "AuthActivity::handleResponseAfterSignIn");
-        if (requestCode == RC_SIGN_IN) {
+        if (requestCode == Constants.RC_SIGN_IN) {
             if (resultCode == RESULT_OK) { // SUCCESS
                 createUserInFirebase();
                 Toast.makeText(getApplicationContext(), getString(R.string.connection_succeed), Toast.LENGTH_SHORT).show();

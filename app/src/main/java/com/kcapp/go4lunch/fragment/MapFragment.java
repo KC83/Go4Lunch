@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -19,21 +20,28 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 
 import com.kcapp.go4lunch.R;
-import com.kcapp.go4lunch.api.places.GetPlacesData;
+import com.kcapp.go4lunch.api.Constants;
+import com.kcapp.go4lunch.api.places.ApiGooglePlaces;
+import com.kcapp.go4lunch.model.GooglePlacesResponse;
+import com.twitter.sdk.android.core.models.Place;
+
+import java.util.List;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class MapFragment extends Fragment {
     GoogleMap mMap;
     Double mLat, mLng;
     SupportMapFragment mMapFragment;
     FusedLocationProviderClient mClient;
-
-    int PROXIMITY_RADIUS = 10000;
 
     private OnMapReadyCallback mCallback = new OnMapReadyCallback() {
 
@@ -88,7 +96,7 @@ public class MapFragment extends Fragment {
     }
 
     /**
-     * Get the current locacation of the user
+     * Get the current location of the user
      */
     private void getCurrentLocation() {
         // Check context
@@ -142,32 +150,57 @@ public class MapFragment extends Fragment {
      * Get places
      */
     private void getPlaces() {
-        Object[] dataTransfer = new Object[2];
-        GetPlacesData getPlacesData = new GetPlacesData();
+        //String location = mLat+","+mLng;
+        String location = "-34.0,151.0";
 
-        if (mMap == null) {
-            return;
-        }
+        ApiGooglePlaces apiGooglePlaces = ApiGooglePlaces.retrofit.create(ApiGooglePlaces.class);
+        Call<GooglePlacesResponse> call = apiGooglePlaces.getPlaces(location,Constants.NEARBY_PROXIMITY_RADIUS,Constants.NEARBY_TYPE,Constants.GOOGLE_BROWER_KEY);
 
-        mMap.clear();
-        String url = getUrl(mLat, mLng);
-        dataTransfer[0] = mMap;
-        dataTransfer[1] = url;
+        call.enqueue(new Callback<GooglePlacesResponse>() {
+            @Override
+            public void onResponse(Call<GooglePlacesResponse> call, Response<GooglePlacesResponse> response) {
+                if (!response.isSuccessful()) {
+                    Toast.makeText(getContext(), "Code : "+response.code(), Toast.LENGTH_LONG).show();
+                    return;
+                }
 
-        getPlacesData.execute(dataTransfer);
+                GooglePlacesResponse googlePlacesResponse = response.body();
+                if (googlePlacesResponse != null) {
+                    List<GooglePlacesResponse.Result> results = googlePlacesResponse.getResults();
+
+                    if (results != null) {
+                        for (GooglePlacesResponse.Result result : results) {
+                            if (result != null && result.getId() != null) {
+                                showPlace(result);
+                            }
+                        }
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<GooglePlacesResponse> call, Throwable t) {
+                Toast.makeText(getContext(), getString(R.string.error_unknown_error), Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     /**
-     * Return the URL to recover the places
-     * @param latitude latitude of the user's current location
-     * @param longitude longitude of the user's current location
-     * @return URL
+     * Show places on map
+     * @param result a google place
      */
-    private String getUrl(double latitude, double longitude) {
-        return "https://maps.googleapis.com/maps/api/place/nearbysearch/json?" + "location=" + latitude + "," + longitude +
-                "&radius=" + PROXIMITY_RADIUS +
-                "&type=restaurant" +
-                "&sensor=true" +
-                "&key=" + getString(R.string.google_browser_key);
+    private void showPlace(GooglePlacesResponse.Result result) {
+        MarkerOptions markerOptions = new MarkerOptions();
+
+        // Set position, title and icon of the place
+        LatLng latLng = new LatLng(result.getGeometry().getLocation().getLat(), result.getGeometry().getLocation().getLng());
+        markerOptions.position(latLng);
+        markerOptions.title(result.getName() + " : " + result.getVicinity());
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+
+        // Put the place on the map
+        mMap.addMarker(markerOptions);
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
     }
 }

@@ -7,11 +7,10 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.kcapp.go4lunch.model.User;
 
 public class UserHelper {
-    private static final String COLLECTION_NAME = "users";
 
     // COLLECTION REFERENCE
     private static CollectionReference getUsersCollection() {
-        return FirebaseFirestore.getInstance().collection(COLLECTION_NAME);
+        return FirebaseFirestore.getInstance().collection(Constants.USER_COLLECTION_NAME);
     }
     // CREATE
     public static Task<Void> createUser(String uid, String username, String email, String urlPicture) {
