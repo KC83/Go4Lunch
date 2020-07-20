@@ -6,13 +6,13 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -26,16 +26,13 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
 
 import com.kcapp.go4lunch.R;
-import com.kcapp.go4lunch.api.Constants;
-import com.kcapp.go4lunch.api.places.ApiGooglePlaces;
-import com.kcapp.go4lunch.model.GooglePlacesResponse;
-import com.twitter.sdk.android.core.models.Place;
-
-import java.util.List;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
+import com.kcapp.go4lunch.api.places.PlacesCallback;
+import com.kcapp.go4lunch.api.places.PlacesRepository;
+import com.kcapp.go4lunch.api.places.PlacesRepositoryImpl;
+import com.kcapp.go4lunch.api.services.InternetManager;
+import com.kcapp.go4lunch.api.services.InternetManagerImpl;
+import com.kcapp.go4lunch.model.places.GooglePlacesResponse;
+import com.kcapp.go4lunch.model.places.Result;
 
 public class MapFragment extends Fragment {
     GoogleMap mMap;
@@ -152,34 +149,21 @@ public class MapFragment extends Fragment {
     private void getPlaces() {
         String location = mLat+","+mLng;
 
-        ApiGooglePlaces apiGooglePlaces = ApiGooglePlaces.retrofit.create(ApiGooglePlaces.class);
-        Call<GooglePlacesResponse> call = apiGooglePlaces.getPlaces(location,Constants.NEARBY_PROXIMITY_RADIUS,Constants.NEARBY_TYPE,getString(R.string.google_browser_key));
+        InternetManager internetManager = new InternetManagerImpl();
+        Context context = this.getContext();
 
-        call.enqueue(new Callback<GooglePlacesResponse>() {
+        PlacesRepository placesRepository = new PlacesRepositoryImpl(internetManager, context);
+        placesRepository.getPlaces(location, new PlacesCallback() {
             @Override
-            public void onResponse(Call<GooglePlacesResponse> call, Response<GooglePlacesResponse> response) {
-                if (!response.isSuccessful()) {
-                    Toast.makeText(getContext(), "Code : "+response.code(), Toast.LENGTH_LONG).show();
-                    return;
-                }
-
-                GooglePlacesResponse googlePlacesResponse = response.body();
-                if (googlePlacesResponse != null) {
-                    List<GooglePlacesResponse.Result> results = googlePlacesResponse.getResults();
-
-                    if (results != null) {
-                        for (GooglePlacesResponse.Result result : results) {
-                            if (result != null && result.getId() != null) {
-                                showPlace(result);
-                            }
-                        }
-                    }
+            public void onPlacesAvailable(GooglePlacesResponse places) {
+                for (Result result : places.getResults()) {
+                    showPlace(result);
                 }
             }
 
             @Override
-            public void onFailure(Call<GooglePlacesResponse> call, Throwable t) {
-                Toast.makeText(getContext(), getString(R.string.error_unknown_error), Toast.LENGTH_LONG).show();
+            public void onError(Exception exception) {
+
             }
         });
     }
@@ -188,14 +172,14 @@ public class MapFragment extends Fragment {
      * Show places on map
      * @param result a google place
      */
-    private void showPlace(GooglePlacesResponse.Result result) {
+    private void showPlace(Result result) {
         MarkerOptions markerOptions = new MarkerOptions();
 
         // Set position, title and icon of the place
         LatLng latLng = new LatLng(result.getGeometry().getLocation().getLat(), result.getGeometry().getLocation().getLng());
         markerOptions.position(latLng);
         markerOptions.title(result.getName() + " : " + result.getVicinity());
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
 
         // Put the place on the map
         mMap.addMarker(markerOptions);

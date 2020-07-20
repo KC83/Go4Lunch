@@ -1,4 +1,4 @@
-package com.kcapp.go4lunch.api;
+package com.kcapp.go4lunch.api.services;
 
 import com.kcapp.go4lunch.R;
 
@@ -18,4 +18,5 @@ public final class Constants {
     public static final String NEARBY_SEARCH_URL = "nearbysearch/json?";
     public static final String NEARBY_PROXIMITY_RADIUS = "10000";
     public static final String NEARBY_TYPE = "restaurant";
+    public static final String GOOGLE_BROWSER_KEY = "AIzaSyBSlvem5jVlKoFGpiIS_2-tj8Q9xhPlcEw";
 }

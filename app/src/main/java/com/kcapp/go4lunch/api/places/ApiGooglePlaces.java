@@ -1,9 +1,7 @@
 package com.kcapp.go4lunch.api.places;
 
-import com.kcapp.go4lunch.api.Constants;
-import com.kcapp.go4lunch.model.GooglePlacesResponse;
-
-import java.util.List;
+import com.kcapp.go4lunch.api.services.Constants;
+import com.kcapp.go4lunch.model.places.GooglePlacesResponse;
 
 import retrofit2.Call;
 import retrofit2.Retrofit;

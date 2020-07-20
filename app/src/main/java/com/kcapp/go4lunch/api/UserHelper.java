@@ -4,6 +4,7 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.model.User;
 
 public class UserHelper {
