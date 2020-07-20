@@ -18,5 +18,4 @@ public final class Constants {
     public static final String NEARBY_SEARCH_URL = "nearbysearch/json?";
     public static final String NEARBY_PROXIMITY_RADIUS = "10000";
     public static final String NEARBY_TYPE = "restaurant";
-    public static final String GOOGLE_BROWER_KEY = String.valueOf(R.string.google_browser_key);
 }

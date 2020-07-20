@@ -150,11 +150,10 @@ public class MapFragment extends Fragment {
      * Get places
      */
     private void getPlaces() {
-        //String location = mLat+","+mLng;
-        String location = "-34.0,151.0";
+        String location = mLat+","+mLng;
 
         ApiGooglePlaces apiGooglePlaces = ApiGooglePlaces.retrofit.create(ApiGooglePlaces.class);
-        Call<GooglePlacesResponse> call = apiGooglePlaces.getPlaces(location,Constants.NEARBY_PROXIMITY_RADIUS,Constants.NEARBY_TYPE,Constants.GOOGLE_BROWER_KEY);
+        Call<GooglePlacesResponse> call = apiGooglePlaces.getPlaces(location,Constants.NEARBY_PROXIMITY_RADIUS,Constants.NEARBY_TYPE,getString(R.string.google_browser_key));
 
         call.enqueue(new Callback<GooglePlacesResponse>() {
             @Override

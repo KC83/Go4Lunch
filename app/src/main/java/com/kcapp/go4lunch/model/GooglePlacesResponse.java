@@ -58,7 +58,7 @@ public class GooglePlacesResponse {
         private OpeningHours openingHours;
 
         @SerializedName("photos")
-        private Photos photos;
+        private List<Photos> photos;
 
         @SerializedName("place_id")
         private String placeId;
@@ -107,7 +107,7 @@ public class GooglePlacesResponse {
             return openingHours;
         }
 
-        public Photos getPhotos() {
+        public List<Photos> getPhotos() {
             return photos;
         }
 
@@ -166,7 +166,7 @@ public class GooglePlacesResponse {
             this.openingHours = openingHours;
         }
 
-        public void setPhotos(Photos photos) {
+        public void setPhotos(List<Photos> photos) {
             this.photos = photos;
         }
 
