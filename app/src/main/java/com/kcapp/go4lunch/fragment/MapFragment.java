@@ -9,6 +9,9 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -21,6 +24,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -126,7 +130,7 @@ public class MapFragment extends Fragment {
 
                     // Zoom map
                     googleMap.addMarker(new MarkerOptions().position(latLng)).setVisible(true);
-                    // Move the camera instantly to location with a zoom of 15.
+                    // Move the camera instantly to location with a zoom of 18.
                     googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(latLng, 18));
                     // Zoom in, animating the camera.
                     googleMap.animateCamera(CameraUpdateFactory.zoomTo(14), 2000, null);
@@ -189,11 +193,24 @@ public class MapFragment extends Fragment {
         LatLng latLng = new LatLng(result.getGeometry().getLocation().getLat(), result.getGeometry().getLocation().getLng());
         markerOptions.position(latLng);
         markerOptions.title(result.getName() + " : " + result.getVicinity());
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+        markerOptions.icon(getMarkerIconFromDrawable(getResources().getDrawable(R.drawable.ic_marker_red)));
+        //markerOptions.icon(getMarkerIconFromDrawable(getResources().getDrawable(R.drawable.ic_marker_green)));
 
         // Put the place on the map
         mMap.addMarker(markerOptions);
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
+    }
+
+    /**
+     * Return a drawable to a bitmap icon
+     * @param drawable drawable
+     * @return bitmap
+     */
+    private BitmapDescriptor getMarkerIconFromDrawable(Drawable drawable) {
+        Canvas canvas = new Canvas();
+        Bitmap bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        canvas.setBitmap(bitmap);
+        drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+        drawable.draw(canvas);
+        return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 }
