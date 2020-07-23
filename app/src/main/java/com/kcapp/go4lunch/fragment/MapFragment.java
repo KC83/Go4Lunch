@@ -6,6 +6,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -22,6 +23,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
 
@@ -146,8 +148,13 @@ public class MapFragment extends Fragment {
     /**
      * Get places
      */
+    @SuppressLint("MissingPermission")
     private void getPlaces() {
-        String location = mLat+","+mLng;
+        if (mMap == null) {
+            return;
+        }
+
+        String location = mLat + "," + mLng;
 
         InternetManager internetManager = new InternetManagerImpl();
         Context context = this.getContext();
@@ -166,6 +173,9 @@ public class MapFragment extends Fragment {
 
             }
         });
+
+        // Set "My location" button
+        mMap.setMyLocationEnabled(true);
     }
 
     /**
