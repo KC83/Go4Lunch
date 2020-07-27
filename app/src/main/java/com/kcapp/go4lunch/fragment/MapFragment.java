@@ -17,6 +17,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
@@ -27,11 +28,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
 
 import com.kcapp.go4lunch.R;
+import com.kcapp.go4lunch.api.places.ApiGooglePlaces;
 import com.kcapp.go4lunch.api.places.PlacesCallback;
 import com.kcapp.go4lunch.api.places.PlacesRepository;
 import com.kcapp.go4lunch.api.places.PlacesRepositoryImpl;
@@ -160,10 +161,11 @@ public class MapFragment extends Fragment {
 
         String location = mLat + "," + mLng;
 
-        InternetManager internetManager = new InternetManagerImpl();
         Context context = this.getContext();
+        InternetManager internetManager = new InternetManagerImpl(context);
+        ApiGooglePlaces apiGooglePlaces = ApiGooglePlaces.retrofit.create(ApiGooglePlaces.class);
 
-        PlacesRepository placesRepository = new PlacesRepositoryImpl(internetManager, context);
+        PlacesRepository placesRepository = new PlacesRepositoryImpl(internetManager, apiGooglePlaces);
         placesRepository.getPlaces(location, new PlacesCallback() {
             @Override
             public void onPlacesAvailable(GooglePlacesResponse places) {
@@ -174,7 +176,7 @@ public class MapFragment extends Fragment {
 
             @Override
             public void onError(Exception exception) {
-
+                Toast.makeText(getContext(), "Error : "+exception.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
 

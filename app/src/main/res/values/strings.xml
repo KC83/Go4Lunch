@@ -36,5 +36,6 @@
     <string name="profile_picture">Image de profil</string>
     <string name="google_current_location">Je suis là</string>
     <string name="permission_denied">Permission refusée</string>
-    
+    <string name="place_image">Image du restaurant</string>
+
 </resources>

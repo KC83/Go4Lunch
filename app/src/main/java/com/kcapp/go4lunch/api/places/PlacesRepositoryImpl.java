@@ -13,12 +13,10 @@ import retrofit2.Response;
 public class PlacesRepositoryImpl implements PlacesRepository {
     ApiGooglePlaces mApiGooglePlaces;
     InternetManager mInternetManager;
-    Context mContext;
 
-    public PlacesRepositoryImpl(InternetManager internetManager, Context context) {
-        this.mApiGooglePlaces = ApiGooglePlaces.retrofit.create(ApiGooglePlaces.class);
+    public PlacesRepositoryImpl(InternetManager internetManager, ApiGooglePlaces apiGooglePlaces) {
+        this.mApiGooglePlaces = apiGooglePlaces;
         this.mInternetManager = internetManager;
-        this.mContext = context;
     }
 
     /**
@@ -28,7 +26,7 @@ public class PlacesRepositoryImpl implements PlacesRepository {
      */
     @Override
     public void getPlaces(String location, PlacesCallback callback) {
-        if (!mInternetManager.isConnected(mContext)) {
+        if (!mInternetManager.isConnected()) {
             callback.onError(new Exception());
         }
 

@@ -5,14 +5,20 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 public class InternetManagerImpl implements InternetManager {
+
+    private Context mContext;
+
+    public InternetManagerImpl(Context context) {
+        mContext = context;
+    }
+
     /**
      * Check if the phone is connected
-     * @param context context
      * @return true if the phone is connected
      */
     @Override
-    public Boolean isConnected(Context context) {
-        ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+    public Boolean isConnected() {
+        ConnectivityManager cm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetwork = cm.getActiveNetworkInfo();
         return activeNetwork != null && activeNetwork.isConnectedOrConnecting();
     }

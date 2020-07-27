@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Name -->
+    <TextView
+        android:id="@+id/item_place_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/app_name"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+    <!-- Address -->
+    <TextView
+        android:id="@+id/item_place_address"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/app_name"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/item_place_name" />
+    <!-- Opening hours -->
+    <TextView
+        android:id="@+id/item_place_opening_hours"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/app_name"
+        android:textStyle="italic"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/item_place_address" />
+    <!-- Distance -->
+    <TextView
+        android:id="@+id/item_place_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/app_name"
+        app:layout_constraintEnd_toStartOf="@+id/item_place_image"
+        app:layout_constraintTop_toTopOf="parent" />
+    <!-- Image workmate -->
+    <ImageView
+        android:id="@+id/item_place_workmates"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:contentDescription="@string/place_image"
+        app:layout_constraintEnd_toStartOf="@+id/item_place_number_workmates"
+        app:layout_constraintBottom_toTopOf="@+id/item_place_rating"
+        app:layout_constraintTop_toBottomOf="@+id/item_place_distance"
+        app:srcCompat="@drawable/ic_user"
+        tools:ignore="VectorDrawableCompat" />
+    <!-- Number of workmates -->
+    <TextView
+        android:id="@+id/item_place_number_workmates"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/app_name"
+        android:paddingStart="6dp"
+        android:paddingEnd="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/item_place_rating"
+        app:layout_constraintEnd_toStartOf="@+id/item_place_image"
+        app:layout_constraintTop_toBottomOf="@+id/item_place_distance" />
+    <!-- Rating -->
+    <RatingBar
+        android:id="@+id/item_place_rating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:numStars="3"
+        app:layout_constraintEnd_toStartOf="@+id/item_place_image"
+        app:layout_constraintTop_toBottomOf="@+id/item_place_number_workmates" />
+    <!-- Image -->
+    <ImageView
+        android:id="@+id/item_place_image"
+        android:layout_width="wrap_content"
+        android:layout_height="102dp"
+        android:contentDescription="@string/place_image"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_launcher_foreground"
+        tools:ignore="VectorDrawableCompat" />
+</androidx.constraintlayout.widget.ConstraintLayout>
