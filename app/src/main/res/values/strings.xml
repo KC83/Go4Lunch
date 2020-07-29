@@ -37,5 +37,6 @@
     <string name="google_current_location">Je suis là</string>
     <string name="permission_denied">Permission refusée</string>
     <string name="place_image">Image du restaurant</string>
+    <string name="place_rating">Classement du restaurant</string>
 
 </resources>

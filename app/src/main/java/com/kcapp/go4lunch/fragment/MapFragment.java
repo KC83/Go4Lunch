@@ -38,8 +38,9 @@ import com.kcapp.go4lunch.api.places.PlacesRepository;
 import com.kcapp.go4lunch.api.places.PlacesRepositoryImpl;
 import com.kcapp.go4lunch.api.services.InternetManager;
 import com.kcapp.go4lunch.api.services.InternetManagerImpl;
+import com.kcapp.go4lunch.model.places.GooglePlaceDetailResponse;
 import com.kcapp.go4lunch.model.places.GooglePlacesResponse;
-import com.kcapp.go4lunch.model.places.Result;
+import com.kcapp.go4lunch.model.places.result.Result;
 
 public class MapFragment extends Fragment {
     GoogleMap mMap;
@@ -173,6 +174,9 @@ public class MapFragment extends Fragment {
                     showPlace(result);
                 }
             }
+
+            @Override
+            public void onPlaceDetailAvailable(GooglePlaceDetailResponse place) {}
 
             @Override
             public void onError(Exception exception) {

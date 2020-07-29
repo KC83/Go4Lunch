@@ -1,8 +1,8 @@
-package com.kcapp.go4lunch.model.places;
+package com.kcapp.go4lunch.model.places.result.geometry;
 
 import com.google.gson.annotations.SerializedName;
 
-public class Southeast {
+public class Location {
     @SerializedName("lat")
     private double lat;
     @SerializedName("lng")
@@ -10,7 +10,7 @@ public class Southeast {
 
     /**
      * GETTERS
-     */
+     **/
     public double getLat() {
         return lat;
     }
@@ -21,7 +21,7 @@ public class Southeast {
 
     /**
      * SETTERS
-     */
+     **/
     public void setLat(double lat) {
         this.lat = lat;
     }

@@ -1,7 +1,6 @@
 package com.kcapp.go4lunch.fragment;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -29,8 +28,9 @@ import com.kcapp.go4lunch.api.places.PlacesRepository;
 import com.kcapp.go4lunch.api.places.PlacesRepositoryImpl;
 import com.kcapp.go4lunch.api.services.InternetManager;
 import com.kcapp.go4lunch.api.services.InternetManagerImpl;
+import com.kcapp.go4lunch.model.places.GooglePlaceDetailResponse;
 import com.kcapp.go4lunch.model.places.GooglePlacesResponse;
-import com.kcapp.go4lunch.model.places.Result;
+import com.kcapp.go4lunch.model.places.result.Result;
 
 import java.util.List;
 
@@ -40,6 +40,10 @@ public class ListFragment extends Fragment {
     ListPlacesAdapter mListPlacesAdapter;
     String mLocation;
 
+    ApiGooglePlaces mApiGooglePlaces;
+    InternetManager mInternetManager;
+    PlacesRepository mPlacesRepository;
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         // Inflate the layout for this fragment
@@ -48,45 +52,12 @@ public class ListFragment extends Fragment {
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        InternetManager internetManager = new InternetManagerImpl(getContext());
-        Context context = this.getContext();
-
-        // Get the user's current location
-        getCurrentLocation();
-        mLocation = -34.0+","+151.0;
-
-        ApiGooglePlaces apiGooglePlaces = ApiGooglePlaces.retrofit.create(ApiGooglePlaces.class);
-
-
-        PlacesRepository placesRepository = new PlacesRepositoryImpl(internetManager, apiGooglePlaces);
-        placesRepository.getPlaces(mLocation, new PlacesCallback() {
-            @Override
-            public void onPlacesAvailable(GooglePlacesResponse places) {
-                mResults = places.getResults();
-
-                mListPlacesAdapter = new ListPlacesAdapter(mResults);
-
-                mListPlaces = view.findViewById(R.id.list_places);
-                mListPlaces.setLayoutManager(new LinearLayoutManager(getContext()));
-                mListPlaces.setAdapter(mListPlacesAdapter);
-            }
-
-            @Override
-            public void onError(Exception exception) {
-                Toast.makeText(getContext(), "Error : "+exception.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        super.onViewCreated(view, savedInstanceState);
-    }
-
-    /**
-     * Get the current location of the user
-     */
-    private void getCurrentLocation() {
         if (getContext() == null) {
             return;
         }
+
+        // Initialize internet manager
+        mInternetManager = new InternetManagerImpl(getContext());
 
         // Initialize fused location
         FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(getContext());
@@ -102,6 +73,41 @@ public class ListFragment extends Fragment {
             // When success
             if (location != null) {
                 mLocation = location.getLatitude()+","+location.getLongitude();
+            }
+
+            // Create retrofit
+            mApiGooglePlaces = ApiGooglePlaces.retrofit.create(ApiGooglePlaces.class);
+
+            // Get results and set them into the list
+            setResults(view);
+        });
+
+        super.onViewCreated(view, savedInstanceState);
+    }
+
+    /**
+     * Get results and set them into the recyclerview
+     * @param view the view of the fragment
+     */
+    private void setResults(View view) {
+        mPlacesRepository = new PlacesRepositoryImpl(mInternetManager, mApiGooglePlaces);
+        mPlacesRepository.getPlaces(mLocation, new PlacesCallback() {
+            @Override
+            public void onPlacesAvailable(GooglePlacesResponse places) {
+                mResults = places.getResults();
+                mListPlacesAdapter = new ListPlacesAdapter(mResults, getContext());
+
+                mListPlaces = view.findViewById(R.id.list_places);
+                mListPlaces.setLayoutManager(new LinearLayoutManager(getContext()));
+                mListPlaces.setAdapter(mListPlacesAdapter);
+            }
+
+            @Override
+            public void onPlaceDetailAvailable(GooglePlaceDetailResponse place) {}
+
+            @Override
+            public void onError(Exception exception) {
+                Toast.makeText(getContext(), "Error : "+exception.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }

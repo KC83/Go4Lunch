@@ -1,6 +1,8 @@
-package com.kcapp.go4lunch.model.places;
+package com.kcapp.go4lunch.model.places.result;
 
 import com.google.gson.annotations.SerializedName;
+import com.kcapp.go4lunch.model.places.result.openinghours.OpeningHours;
+import com.kcapp.go4lunch.model.places.result.geometry.Geometry;
 
 import java.util.List;
 
@@ -17,7 +19,7 @@ public class Result {
     @SerializedName("name")
     private String name;
 
-    @SerializedName("openingHours")
+    @SerializedName("opening_hours")
     private OpeningHours openingHours;
 
     @SerializedName("photos")

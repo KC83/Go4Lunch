@@ -1,4 +1,4 @@
-package com.kcapp.go4lunch.model.places;
+package com.kcapp.go4lunch.model.places.result;
 
 import com.google.gson.annotations.SerializedName;
 

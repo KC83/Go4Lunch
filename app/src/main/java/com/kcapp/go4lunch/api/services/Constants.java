@@ -16,6 +16,8 @@ public final class Constants {
 
     public static final String BASE_URL = "https://maps.googleapis.com/maps/api/place/";
     public static final String NEARBY_SEARCH_URL = "nearbysearch/json?";
+    public static final String DETAIL_SEARCH_URL = "details/json?";
+    public static final String PHOTO_SEARCH_URL = "photo?";
     public static final String NEARBY_PROXIMITY_RADIUS = "10000";
     public static final String NEARBY_TYPE = "restaurant";
     public static final String GOOGLE_BROWSER_KEY = "AIzaSyBSlvem5jVlKoFGpiIS_2-tj8Q9xhPlcEw";

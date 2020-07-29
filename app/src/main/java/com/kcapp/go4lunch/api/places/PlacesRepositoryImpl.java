@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.api.services.InternetManager;
+import com.kcapp.go4lunch.model.places.GooglePlaceDetailResponse;
 import com.kcapp.go4lunch.model.places.GooglePlacesResponse;
 
 import retrofit2.Call;
@@ -43,6 +44,35 @@ public class PlacesRepositoryImpl implements PlacesRepository {
 
             @Override
             public void onFailure(Call<GooglePlacesResponse> call, Throwable t) {
+                callback.onError(new Exception());
+            }
+        });
+    }
+
+    /**
+     * Get place detail
+     * @param placeId the place id
+     * @param callback callback
+     */
+    @Override
+    public void getPlaceDetail(String placeId, PlacesCallback callback) {
+        if (!mInternetManager.isConnected()) {
+            callback.onError(new Exception());
+        }
+
+        Call<GooglePlaceDetailResponse> call = mApiGooglePlaces.getPlaceDetail(placeId, Constants.GOOGLE_BROWSER_KEY);
+        call.enqueue(new Callback<GooglePlaceDetailResponse>() {
+            @Override
+            public void onResponse(Call<GooglePlaceDetailResponse> call, Response<GooglePlaceDetailResponse> response) {
+                if (!response.isSuccessful()) {
+                    callback.onError(new Exception());
+                }
+
+                callback.onPlaceDetailAvailable(response.body());
+            }
+
+            @Override
+            public void onFailure(Call<GooglePlaceDetailResponse> call, Throwable t) {
                 callback.onError(new Exception());
             }
         });
