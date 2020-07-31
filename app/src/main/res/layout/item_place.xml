@@ -38,6 +38,7 @@
         android:layout_height="wrap_content"
         android:text="@string/app_name"
         android:textStyle="italic"
+        android:textColor="@color/colorAccentGray"
         app:layout_constraintBottom_toBottomOf="@+id/item_place_image"
         app:layout_constraintEnd_toStartOf="@+id/item_place_rating"
         app:layout_constraintStart_toStartOf="parent" />
@@ -47,6 +48,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/app_name"
+        android:textColor="@android:color/darker_gray"
         android:paddingEnd="15dp"
         android:paddingStart="10dp"
         app:layout_constraintEnd_toStartOf="@id/item_place_image"

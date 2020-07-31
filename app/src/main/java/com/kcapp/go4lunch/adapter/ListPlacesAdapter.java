@@ -1,6 +1,7 @@
 package com.kcapp.go4lunch.adapter;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -115,6 +116,14 @@ class ViewHolder extends RecyclerView.ViewHolder {
                     mItemPlaceOpeningHours.setText(place.getResult().getOpeningHours().getOpeningHoursText(mContext));
                 } else {
                     mItemPlaceOpeningHours.setText(R.string.opening_hours_not_indicated);
+                }
+
+                if (mItemPlaceOpeningHours.getText() == mContext.getString(R.string.opening_hours_close_soon)) {
+                    mItemPlaceOpeningHours.setTextColor(mContext.getResources().getColor(R.color.colorYellow));
+                } else if (mItemPlaceOpeningHours.getText() == mContext.getString(R.string.opening_hours_close) || mItemPlaceOpeningHours.getText() == mContext.getString(R.string.opening_hours_close_today)) {
+                    mItemPlaceOpeningHours.setTextColor(mContext.getResources().getColor(R.color.colorRed));
+                } else {
+                    mItemPlaceOpeningHours.setTextColor(mContext.getResources().getColor(R.color.colorAccentGray));
                 }
 
                 // PHOTO
