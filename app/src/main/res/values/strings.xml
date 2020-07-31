@@ -12,7 +12,6 @@
     <!-- GOOGLE -->
     <string name="google_browser_key" translatable="false">AIzaSyBSlvem5jVlKoFGpiIS_2-tj8Q9xhPlcEw</string>
 
-
     <string name="main_activity_description">Trouver un restaurant et inviter vos collègues pour déjeuner !</string>
     <string name="main_activity_logo">Logo de l\'application</string>
     <string name="button_login_facebook">Se connecter avec Facebook</string>
@@ -39,4 +38,12 @@
     <string name="place_image">Image du restaurant</string>
     <string name="place_rating">Classement du restaurant</string>
 
+    <!-- OPENING HOURS -->
+    <string name="opening_hours_not_indicated">Non indiqué</string>
+    <string name="opening_hours_always_open" translatable="false">24h/24</string>
+    <string name="opening_hours_open_soon">Ouvre bientôt</string>
+    <string name="opening_hours_open_until">Ouvert jusqu\'à</string>
+    <string name="opening_hours_close">Fermé</string>
+    <string name="opening_hours_close_soon">Ferme bientôt</string>
+    <string name="opening_hours_close_today">Fermé aujourd\'hui</string>
 </resources>

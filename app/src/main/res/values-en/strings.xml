@@ -26,4 +26,10 @@
     <string name="permission_denied">Permission denied</string>
     <string name="place_image">Restaurant image</string>
     <string name="place_rating">Restaurant rating</string>
+    <string name="opening_hours_not_indicated">Not indicated</string>
+    <string name="opening_hours_open_soon" translatable="false">Open soon</string>
+    <string name="opening_hours_open_until">Open until</string>
+    <string name="opening_hours_close_soon">Close soon</string>
+    <string name="opening_hours_close_today">Close today</string>
+    <string name="opening_hours_close">Close</string>
 </resources>

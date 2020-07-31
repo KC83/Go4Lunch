@@ -5,7 +5,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -110,6 +109,24 @@ class ViewHolder extends RecyclerView.ViewHolder {
                 mItemPlaceAddress.setText(result.getVicinity());
                 mItemPlaceWorkmates.setVisibility(View.INVISIBLE);
                 mItemPlaceNumberWorkmates.setText(null);
+
+                // OPENING HOURS
+                if (place.getResult().getOpeningHours() != null) {
+                    mItemPlaceOpeningHours.setText(place.getResult().getOpeningHours().getOpeningHoursText(mContext));
+                } else {
+                    mItemPlaceOpeningHours.setText(R.string.opening_hours_not_indicated);
+                }
+
+                // PHOTO
+                if (result.getPhotos() != null) {
+                    RequestManager requestManager = Glide.with(mItemView);
+                    requestManager.load(Constants.BASE_URL+Constants.PHOTO_SEARCH_URL+"maxwidth=400&photoreference="+result.getPhotos().get(0).getPhotoReference()+"&key="+Constants.GOOGLE_BROWSER_KEY).into(mItemPlaceImage);
+                } else {
+                    mItemPlaceImage.setImageResource(R.drawable.ic_no_camera);
+                }
+
+                // RATING
+                mItemPlaceRating.setImageResource(getRatingImageResource(result.getRating()));
             }
 
             @Override
@@ -117,17 +134,6 @@ class ViewHolder extends RecyclerView.ViewHolder {
                 Toast.makeText(mContext, "Error : "+exception.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-
-        // PHOTO
-        if (result.getPhotos() != null) {
-            RequestManager requestManager = Glide.with(mItemView);
-            requestManager.load(Constants.BASE_URL+Constants.PHOTO_SEARCH_URL+"maxwidth=400&photoreference="+result.getPhotos().get(0).getPhotoReference()+"&key="+Constants.GOOGLE_BROWSER_KEY).into(mItemPlaceImage);
-        } else {
-            mItemPlaceImage.setImageResource(R.drawable.ic_no_camera);
-        }
-
-        // RATING
-        mItemPlaceRating.setImageResource(getRatingImageResource(result.getRating()));
     }
 
     /**
