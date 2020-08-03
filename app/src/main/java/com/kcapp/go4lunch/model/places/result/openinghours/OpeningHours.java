@@ -36,9 +36,6 @@ public class OpeningHours {
     }
 
     /**
-     * OTHERS
-     **/
-    /**
      *  Get the text for opening hours
      * @param context context of the application
      * @return text for opening hours

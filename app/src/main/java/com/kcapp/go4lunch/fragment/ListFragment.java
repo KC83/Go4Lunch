@@ -39,6 +39,7 @@ public class ListFragment extends Fragment {
     RecyclerView mListPlaces;
     ListPlacesAdapter mListPlacesAdapter;
     String mLocation;
+    double mLat, mLng;
 
     ApiGooglePlaces mApiGooglePlaces;
     InternetManager mInternetManager;
@@ -73,6 +74,8 @@ public class ListFragment extends Fragment {
             // When success
             if (location != null) {
                 mLocation = location.getLatitude()+","+location.getLongitude();
+                mLat = location.getLatitude();
+                mLng = location.getLongitude();
             }
 
             // Create retrofit
@@ -95,7 +98,7 @@ public class ListFragment extends Fragment {
             @Override
             public void onPlacesAvailable(GooglePlacesResponse places) {
                 mResults = places.getResults();
-                mListPlacesAdapter = new ListPlacesAdapter(mResults, getContext());
+                mListPlacesAdapter = new ListPlacesAdapter(mResults, getContext(), mLat, mLng);
 
                 mListPlaces = view.findViewById(R.id.list_places);
                 mListPlaces.setLayoutManager(new LinearLayoutManager(getContext()));

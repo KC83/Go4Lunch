@@ -1,7 +1,8 @@
 package com.kcapp.go4lunch.adapter;
 
+import android.location.Location;
+
 import android.content.Context;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +15,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
+import com.bumptech.glide.request.RequestOptions;
 import com.kcapp.go4lunch.R;
 import com.kcapp.go4lunch.api.places.ApiGooglePlaces;
 import com.kcapp.go4lunch.api.places.PlacesCallback;
@@ -26,21 +29,25 @@ import com.kcapp.go4lunch.model.places.GooglePlacesResponse;
 import com.kcapp.go4lunch.model.places.result.Result;
 
 import java.util.List;
+import java.util.Locale;
 
 public class ListPlacesAdapter extends RecyclerView.Adapter<ViewHolder> {
     private List<Result> mResults;
     private Context mContext;
+    private double mLat, mLng;
 
-    public ListPlacesAdapter(List<Result> results, Context context) {
+    public ListPlacesAdapter(List<Result> results, Context context, double lat, double lng) {
         this.mResults = results;
         this.mContext = context;
+        this.mLat = lat;
+        this.mLng = lng;
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.item_place, parent, false);
-        return new ViewHolder(view, mContext);
+        return new ViewHolder(view, mContext, mLat, mLng);
     }
 
     @Override
@@ -59,7 +66,7 @@ public class ListPlacesAdapter extends RecyclerView.Adapter<ViewHolder> {
 
 class ViewHolder extends RecyclerView.ViewHolder {
     private View mItemView;
-
+    private double mLat, mLng;
     private InternetManager mInternetManager;
     private ApiGooglePlaces mApiGooglePlaces;
     private Context mContext;
@@ -73,11 +80,12 @@ class ViewHolder extends RecyclerView.ViewHolder {
     private ImageView mItemPlaceRating;
     private ImageView mItemPlaceImage;
 
-    ViewHolder(@NonNull View itemView, Context context) {
+    ViewHolder(@NonNull View itemView, Context context, double lat, double lng) {
         super(itemView);
 
         mItemView = itemView;
-
+        mLat = lat;
+        mLng = lng;
         mContext = context;
         mInternetManager = new InternetManagerImpl(context);
         mApiGooglePlaces = ApiGooglePlaces.retrofit.create(ApiGooglePlaces.class);
@@ -126,10 +134,23 @@ class ViewHolder extends RecyclerView.ViewHolder {
                     mItemPlaceOpeningHours.setTextColor(mContext.getResources().getColor(R.color.colorAccentGray));
                 }
 
+                // DISTANCE LOCATION
+                float[] distances = new float[2];
+                Location.distanceBetween(mLat, mLng, place.getResult().getGeometry().getLocation().getLat(), place.getResult().getGeometry().getLocation().getLng(), distances);
+                String distance = null;
+                if (distances[0] >= 1000) {
+                    distance = String.format(Locale.getDefault(),"%.1f", distances[0]/1000)+"km";
+                } else {
+                    distance = Math.round(distances[0])+"m";
+                }
+                mItemPlaceDistance.setText(distance);
+
                 // PHOTO
                 if (result.getPhotos() != null) {
                     RequestManager requestManager = Glide.with(mItemView);
-                    requestManager.load(Constants.BASE_URL+Constants.PHOTO_SEARCH_URL+"maxwidth=400&photoreference="+result.getPhotos().get(0).getPhotoReference()+"&key="+Constants.GOOGLE_BROWSER_KEY).into(mItemPlaceImage);
+                    requestManager.load(Constants.BASE_URL+Constants.PHOTO_SEARCH_URL+"maxwidth=400&photoreference="+result.getPhotos().get(0).getPhotoReference()+"&key="+Constants.GOOGLE_BROWSER_KEY)
+                            .apply(new RequestOptions().transform(new RoundedCorners(25)))
+                            .into(mItemPlaceImage);
                 } else {
                     mItemPlaceImage.setImageResource(R.drawable.ic_no_camera);
                 }

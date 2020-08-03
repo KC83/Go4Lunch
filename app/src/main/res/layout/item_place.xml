@@ -92,8 +92,8 @@
     <!-- Image -->
     <ImageView
         android:id="@+id/item_place_image"
-        android:layout_width="80dp"
-        android:layout_height="80dp"
+        android:layout_width="100dp"
+        android:layout_height="70dp"
         android:contentDescription="@string/place_image"
         app:layout_constraintEnd_toEndOf="parent"
         tools:ignore="MissingConstraints,VectorDrawableCompat"
