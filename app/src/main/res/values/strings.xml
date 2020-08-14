@@ -35,8 +35,17 @@
     <string name="profile_picture">Image de profil</string>
     <string name="google_current_location">Je suis là</string>
     <string name="permission_denied">Permission refusée</string>
-    <string name="place_image">Image du restaurant</string>
+
+    <!-- PLACE TEXT -->
+    <string name="place_name">Nom</string>
+    <string name="place_address">Adresse</string>
+    <string name="place_opening_hours">Heures d\'ouverture</string>
+    <string name="place_distance">Distance</string>
+    <string name="place_image_workmate">Image des collègues</string>
+    <string name="place_number_workmates">Nombre</string>
     <string name="place_rating">Classement du restaurant</string>
+    <string name="place_image">Image du restaurant</string>
+
 
     <!-- OPENING HOURS -->
     <string name="opening_hours_not_indicated">Non indiqué</string>
@@ -46,4 +55,8 @@
     <string name="opening_hours_close">Fermé</string>
     <string name="opening_hours_close_soon">Ferme bientôt</string>
     <string name="opening_hours_close_today">Fermé aujourd\'hui</string>
+
+    <!-- WORKMATE TEXT -->
+    <string name="workmate_title">Titre</string>
+
 </resources>

@@ -27,9 +27,16 @@
     <string name="place_image">Restaurant image</string>
     <string name="place_rating">Restaurant rating</string>
     <string name="opening_hours_not_indicated">Not indicated</string>
-    <string name="opening_hours_open_soon" translatable="false">Open soon</string>
+    <string name="opening_hours_open_soon">Open soon</string>
     <string name="opening_hours_open_until">Open until</string>
     <string name="opening_hours_close_soon">Close soon</string>
     <string name="opening_hours_close_today">Close today</string>
     <string name="opening_hours_close">Close</string>
+    <string name="place_name">Name</string>
+    <string name="place_address">Address</string>
+    <string name="place_opening_hours">Opening hours</string>
+    <string name="place_distance">Distance</string>
+    <string name="place_image_workmate">Workmates image</string>
+    <string name="place_number_workmates">Number</string>
+    <string name="workmate_title">Title</string>
 </resources>

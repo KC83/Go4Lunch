@@ -14,7 +14,7 @@ import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.kcapp.go4lunch.api.services.Constants;
-import com.kcapp.go4lunch.api.UserHelper;
+import com.kcapp.go4lunch.api.helper.UserHelper;
 
 import java.util.Collections;
 
