@@ -139,8 +139,8 @@ class ViewHolder extends RecyclerView.ViewHolder {
                 // PHOTO
                 if (result.getPhotos() != null) {
                     RequestManager requestManager = Glide.with(mItemView);
-                    requestManager.load(Constants.BASE_URL+Constants.PHOTO_SEARCH_URL+"maxwidth=400&photoreference="+result.getPhotos().get(0).getPhotoReference()+"&key="+Constants.GOOGLE_BROWSER_KEY)
-                            .apply(new RequestOptions().transform(new RoundedCorners(25)))
+                    requestManager
+                            .load(Constants.BASE_URL+Constants.PHOTO_SEARCH_URL+"maxwidth=400&photoreference="+result.getPhotos().get(0).getPhotoReference()+"&key="+Constants.GOOGLE_BROWSER_KEY)
                             .into(mItemPlaceImage);
                 } else {
                     mItemPlaceImage.setImageResource(R.drawable.ic_no_photo);
@@ -166,6 +166,7 @@ class ViewHolder extends RecyclerView.ViewHolder {
             if (user.getUrlPicture().length() > 0) {
                 Picasso.with(mContext)
                         .load(user.getUrlPicture())
+                        .transform(new CircleTransform())
                         .into(mItemWorkmateImage);
             } else {
                 mItemWorkmateImage.setImageResource(R.drawable.ic_no_photo);
