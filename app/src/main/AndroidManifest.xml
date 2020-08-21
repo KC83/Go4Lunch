@@ -77,6 +77,9 @@
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
+        <activity android:name=".PlaceActivity"
+            android:theme="@style/AppTheme.NoActionBar.Translucent"
+            android:fitsSystemWindows="true" />
 
     </application>
 

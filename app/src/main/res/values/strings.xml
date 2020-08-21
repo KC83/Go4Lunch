@@ -58,5 +58,8 @@
 
     <!-- WORKMATE TEXT -->
     <string name="workmate_title">Titre</string>
+    <string name="website">Site web</string>
+    <string name="like">Aimer</string>
+    <string name="call">Appeler</string>
 
 </resources>

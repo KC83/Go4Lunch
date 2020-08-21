@@ -8,6 +8,7 @@ import androidx.fragment.app.Fragment;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -28,14 +29,17 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.Task;
 
+import com.kcapp.go4lunch.PlaceActivity;
 import com.kcapp.go4lunch.R;
 import com.kcapp.go4lunch.api.places.ApiGooglePlaces;
 import com.kcapp.go4lunch.api.places.PlacesCallback;
 import com.kcapp.go4lunch.api.places.PlacesRepository;
 import com.kcapp.go4lunch.api.places.PlacesRepositoryImpl;
+import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.api.services.InternetManager;
 import com.kcapp.go4lunch.api.services.InternetManagerImpl;
 import com.kcapp.go4lunch.model.places.GooglePlaceDetailResponse;
@@ -186,6 +190,19 @@ public class MapFragment extends Fragment {
 
         // Set "My location" button
         mMap.setMyLocationEnabled(true);
+
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                String placeId = (String) marker.getTag();
+
+                Intent intent = new Intent(getContext(), PlaceActivity.class);
+                intent.putExtra(Constants.PLACE_ID, placeId);
+                startActivity(intent);
+
+                return false;
+            }
+        });
     }
 
     /**
@@ -198,12 +215,14 @@ public class MapFragment extends Fragment {
         // Set position, title and icon of the place
         LatLng latLng = new LatLng(result.getGeometry().getLocation().getLat(), result.getGeometry().getLocation().getLng());
         markerOptions.position(latLng);
+
         markerOptions.title(result.getName() + " : " + result.getVicinity());
         markerOptions.icon(getMarkerIconFromDrawable(getResources().getDrawable(R.drawable.ic_marker_red)));
         //markerOptions.icon(getMarkerIconFromDrawable(getResources().getDrawable(R.drawable.ic_marker_green)));
 
         // Put the place on the map
-        mMap.addMarker(markerOptions);
+        Marker marker = mMap.addMarker(markerOptions);
+        marker.setTag(result.getPlaceId());
     }
 
     /**

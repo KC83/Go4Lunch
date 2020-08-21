@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:fitsSystemWindows="true"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <!-- Image -->
+    <ImageView
+        android:id="@+id/place_activity_place_image"
+        android:layout_width="match_parent"
+        android:layout_height="250dp"
+        android:contentDescription="@string/place_image"
+        android:scaleType="centerCrop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@tools:sample/backgrounds/scenic" />
+
+    <!-- Check/Uncheck button -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/floatingActionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:src="@drawable/ic_uncheck"
+        app:layout_constraintBottom_toBottomOf="@+id/place_activity_place_image"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/place_activity_place_image" />
+
+    <!-- Name -->
+    <TextView
+        android:id="@+id/place_activity_place_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingTop="10dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:drawablePadding="10dp"
+        android:drawableEnd="@drawable/ic_star_yellow"
+        android:background="@color/colorPrimary"
+        android:text="@string/place_name"
+        android:textColor="@color/colorAccent"
+        android:textSize="22sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/place_activity_place_image" />
+
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:background="@color/colorPrimary"
+        app:layout_constraintBottom_toTopOf="@+id/place_activity_place_address"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/place_activity_place_name"
+        app:layout_constraintTop_toBottomOf="@+id/place_activity_place_image" />
+
+    <!--Address -->
+    <TextView
+        android:id="@+id/place_activity_place_address"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:paddingBottom="20dp"
+        android:paddingStart="10dp"
+        android:paddingEnd="10dp"
+        android:background="@color/colorPrimary"
+        android:text="@string/place_address"
+        android:textColor="@color/colorAccent"
+        android:textSize="14sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/place_activity_place_name" />
+
+    <!-- Buttons -->
+    <LinearLayout
+        android:id="@+id/place_activity_layout_button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:background="@drawable/shape_place"
+        app:layout_constraintTop_toBottomOf="@+id/place_activity_place_address">
+
+        <!-- Call button -->
+        <Button
+            android:id="@+id/place_activity_call"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            style="@style/Animation.Design.BottomSheetDialog"
+            android:background="#00FFFFFF"
+            android:text="@string/call"
+            android:textColor="@color/colorPrimary"
+            android:drawableTop="@drawable/ic_call"
+            android:drawablePadding="10dp"/>
+
+        <!-- Like button -->
+        <Button
+            android:id="@+id/place_activity_like"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            style="@style/Animation.Design.BottomSheetDialog"
+            android:background="#00FFFFFF"
+            android:text="@string/like"
+            android:textColor="@color/colorPrimary"
+            android:drawableTop="@drawable/ic_star"
+            android:drawablePadding="10dp"/>
+
+        <!-- Website button -->
+        <Button
+            android:id="@+id/place_activity_website"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            style="@style/Animation.Design.BottomSheetDialog"
+            android:background="#00FFFFFF"
+            android:text="@string/website"
+            android:textColor="@color/colorPrimary"
+            android:drawableTop="@drawable/ic_world"
+            android:drawablePadding="10dp"/>
+
+    </LinearLayout>
+
+    <!-- List of workmates -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/list_workmates"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/place_activity_layout_button"
+        tools:listitem="@layout/item_workmate" />
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -177,6 +177,8 @@ class ViewHolder extends RecyclerView.ViewHolder {
         mItemWorkmateTitle.setText(user.getUsername());
     }
 
+
+
     /**
      * Get image resource for a place
      * @param rating the rating of the place

@@ -39,4 +39,7 @@
     <string name="place_image_workmate">Workmates image</string>
     <string name="place_number_workmates">Number</string>
     <string name="workmate_title">Title</string>
+    <string name="website">Website</string>
+    <string name="like">Like</string>
+    <string name="call">Call</string>
 </resources>

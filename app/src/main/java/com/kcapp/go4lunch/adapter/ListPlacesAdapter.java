@@ -17,12 +17,18 @@ public class ListPlacesAdapter extends RecyclerView.Adapter<ViewHolder> {
     private List<Result> mResults;
     private Context mContext;
     private double mLat, mLng;
+    private ListPlacesListener mListPlacesListener;
 
-    public ListPlacesAdapter(List<Result> results, Context context, double lat, double lng) {
+    public interface ListPlacesListener {
+        void onClick(String placeId);
+    }
+
+    public ListPlacesAdapter(List<Result> results, Context context, double lat, double lng, ListPlacesListener listPlacesListener) {
         this.mResults = results;
         this.mContext = context;
         this.mLat = lat;
         this.mLng = lng;
+        this.mListPlacesListener = listPlacesListener;
     }
 
     @NonNull
@@ -35,6 +41,9 @@ public class ListPlacesAdapter extends RecyclerView.Adapter<ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.bind(mResults.get(position));
+        holder.itemView.setOnClickListener(view -> {
+            mListPlacesListener.onClick(mResults.get(position).getPlaceId());
+        });
     }
 
     @Override

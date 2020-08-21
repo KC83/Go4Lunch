@@ -1,6 +1,7 @@
 package com.kcapp.go4lunch.fragment;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -20,12 +21,15 @@ import android.widget.Toast;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.Task;
+import com.kcapp.go4lunch.MainActivity;
+import com.kcapp.go4lunch.PlaceActivity;
 import com.kcapp.go4lunch.R;
 import com.kcapp.go4lunch.adapter.ListPlacesAdapter;
 import com.kcapp.go4lunch.api.places.ApiGooglePlaces;
 import com.kcapp.go4lunch.api.places.PlacesCallback;
 import com.kcapp.go4lunch.api.places.PlacesRepository;
 import com.kcapp.go4lunch.api.places.PlacesRepositoryImpl;
+import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.api.services.InternetManager;
 import com.kcapp.go4lunch.api.services.InternetManagerImpl;
 import com.kcapp.go4lunch.model.places.GooglePlaceDetailResponse;
@@ -34,7 +38,7 @@ import com.kcapp.go4lunch.model.places.result.Result;
 
 import java.util.List;
 
-public class ListFragment extends Fragment {
+public class ListFragment extends Fragment implements ListPlacesAdapter.ListPlacesListener {
     List<Result> mResults;
     RecyclerView mListPlaces;
     ListPlacesAdapter mListPlacesAdapter;
@@ -98,7 +102,7 @@ public class ListFragment extends Fragment {
             @Override
             public void onPlacesAvailable(GooglePlacesResponse places) {
                 mResults = places.getResults();
-                mListPlacesAdapter = new ListPlacesAdapter(mResults, getContext(), mLat, mLng);
+                mListPlacesAdapter = new ListPlacesAdapter(mResults, getContext(), mLat, mLng, ListFragment.this);
 
                 mListPlaces = view.findViewById(R.id.list_places);
                 mListPlaces.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -113,5 +117,12 @@ public class ListFragment extends Fragment {
                 Toast.makeText(getContext(), "Error : "+exception.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    @Override
+    public void onClick(String placeId) {
+        Intent intent = new Intent(getContext(), PlaceActivity.class);
+        intent.putExtra(Constants.PLACE_ID, placeId);
+        startActivity(intent);
     }
 }
