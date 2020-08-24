@@ -7,6 +7,9 @@ import com.kcapp.go4lunch.model.places.result.geometry.Geometry;
 import java.util.List;
 
 public class Result {
+    @SerializedName("formatted_phone_number")
+    private String formattedPhoneNumber;
+
     @SerializedName("geometry")
     private Geometry geometry;
 
@@ -49,9 +52,16 @@ public class Result {
     @SerializedName("vicinity")
     private String vicinity;
 
+    @SerializedName("website")
+    private String website;
+
     /**
      * GETTERS
      **/
+    public String getFormattedPhoneNumber() {
+        return formattedPhoneNumber;
+    }
+
     public Geometry getGeometry() {
         return geometry;
     }
@@ -108,9 +118,17 @@ public class Result {
         return vicinity;
     }
 
+    public String getWebsite() {
+        return website;
+    }
+
     /**
      * SETTERS
      **/
+    public void setFormattedPhoneNumber(String formattedPhoneNumber) {
+        this.formattedPhoneNumber = formattedPhoneNumber;
+    }
+
     public void setGeometry(Geometry geometry) {
         this.geometry = geometry;
     }
@@ -165,5 +183,9 @@ public class Result {
 
     public void setVicinity(String vicinity) {
         this.vicinity = vicinity;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
     }
 }

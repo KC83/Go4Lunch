@@ -6,8 +6,14 @@ public final class Constants {
     /**
      * AUTH
      */
-    public static final String USER_COLLECTION_NAME = "users";
     public static final int RC_SIGN_IN = 100;
+
+    /**
+     * HELPER
+     */
+    public static final String USER_COLLECTION_NAME = "users";
+    public static final String PLACE_LIKE_COLLECTION_NAME = "placeLike";
+    public static final String PLACE_LUNCH_COLLECTION_NAME = "placeLunch";
 
     /**
      * GOOGLE MAPS

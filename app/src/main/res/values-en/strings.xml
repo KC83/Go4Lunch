@@ -42,4 +42,11 @@
     <string name="website">Website</string>
     <string name="like">Like</string>
     <string name="call">Call</string>
+    <string name="no_phone">This restaurant doesn\'t have a phone number</string>
+    <string name="no_website">This restaurant doesn\'t have a website</string>
+    <string name="success_add_place_like">PlaceLike written with ID</string>
+    <string name="error_add_place_like">Error adding placeLike</string>
+    <string name="dislike">Dislike</string>
+    <string name="success_add_place_lunch">PlaceLunch written with ID</string>
+    <string name="error_add_place_lunch">Error adding placeLunch</string>
 </resources>

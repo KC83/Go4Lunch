@@ -35,6 +35,7 @@
     <string name="profile_picture">Image de profil</string>
     <string name="google_current_location">Je suis là</string>
     <string name="permission_denied">Permission refusée</string>
+    <string name="no_phone">Ce restaurant n\'a pas de numéro de téléphone</string>
 
     <!-- PLACE TEXT -->
     <string name="place_name">Nom</string>
@@ -60,6 +61,11 @@
     <string name="workmate_title">Titre</string>
     <string name="website">Site web</string>
     <string name="like">Aimer</string>
+    <string name="dislike">Ne pas aimer</string>
     <string name="call">Appeler</string>
-
+    <string name="no_website">Ce restaurant n\'a pas de site web</string>
+    <string name="success_add_place_like">PlaceLike écrit avec l\'ID</string>
+    <string name="success_add_place_lunch">PlaceLunch écrit avec l\'ID</string>
+    <string name="error_add_place_like">Erreur en ajoutant un placeLike</string>
+    <string name="error_add_place_lunch">Erreur en ajoutant un placeLunch</string>
 </resources>
