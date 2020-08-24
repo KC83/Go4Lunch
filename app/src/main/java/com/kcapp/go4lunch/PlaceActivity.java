@@ -4,13 +4,17 @@ import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
@@ -41,6 +45,8 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback {
     private TextView mPlaceName;
     private TextView mPlaceAddress;
 
+    private TextView mInformation;
+    private ProgressBar mProgressBar;
     private FloatingActionButton mLunchButton;
 
     private Button mCallButton;
@@ -54,6 +60,8 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback {
     private boolean mIsPlaceLiked;
     private boolean mIsPlaceLunch;
 
+    private InternetManager mInternetManager;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,12 +69,17 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback {
 
         // Init view
         initView();
+        showElements(false, true,getString(R.string.loading));
 
-        InternetManager internetManager = new InternetManagerImpl(this);
+        mInternetManager = new InternetManagerImpl(this);
+        if (!mInternetManager.isConnected()) {
+            showElements(false, false, getString(R.string.error_no_internet));
+            return;
+        }
         ApiGooglePlaces apiGooglePlaces = ApiGooglePlaces.retrofit.create(ApiGooglePlaces.class);
 
         // Get place
-        PlacesRepositoryImpl placesRepository = new PlacesRepositoryImpl(internetManager, apiGooglePlaces);
+        PlacesRepositoryImpl placesRepository = new PlacesRepositoryImpl(mInternetManager, apiGooglePlaces);
         placesRepository.getPlaceDetail(mPlaceId, this);
     }
 
@@ -87,11 +100,52 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback {
         mPlaceName = findViewById(R.id.place_activity_place_name);
         mPlaceAddress = findViewById(R.id.place_activity_place_address);
 
+        mInformation = findViewById(R.id.place_activity_information);
+        mProgressBar = findViewById(R.id.place_activity_progress_bar);
         mLunchButton = findViewById(R.id.place_activity_lunch);
 
         mCallButton = findViewById(R.id.place_activity_call);
         mLikeButton = findViewById(R.id.place_activity_like);
         mWebsiteButton = findViewById(R.id.place_activity_website);
+    }
+
+    /**
+     * Show elements on the view
+     * @param isShowed if true, show elements
+     * @param informationText set the text for the information text
+     */
+    private void showElements(boolean isShowed, boolean isProgressBarShowed, @Nullable String informationText) {
+        int visibility = View.VISIBLE;
+        if (!isShowed) {
+            visibility = View.INVISIBLE;
+        }
+
+        ConstraintLayout layout = (ConstraintLayout) findViewById(R.id.place_activity_layout);
+        for (int i = 0; i < layout.getChildCount(); i++) {
+            View child = layout.getChildAt(i);
+            child.setVisibility(visibility);
+        }
+
+        mInformation.setText(informationText);
+        mInformation.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0);
+        if (!isShowed) {
+            mInformation.setVisibility(View.VISIBLE);
+        } else {
+            mInformation.setVisibility(View.INVISIBLE);
+        }
+
+        if (informationText != null) {
+            if (informationText.equals(getString(R.string.error_no_internet))) {
+                //mInformation.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_no_wifi, 0, 0);
+                mProgressBar.setProgressDrawable(getResources().getDrawable(R.drawable.ic_no_wifi));
+            }
+        }
+
+        if (isProgressBarShowed) {
+            mProgressBar.setVisibility(View.VISIBLE);
+        } else {
+            mProgressBar.setVisibility(View.INVISIBLE);
+        }
     }
 
     /**
@@ -263,10 +317,16 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback {
                 Toast.makeText(PlaceActivity.this, R.string.no_website, Toast.LENGTH_SHORT).show();
             }
         });
+
+        // After 1s the elements are visible
+        final Handler handler = new Handler();
+        handler.postDelayed(() -> showElements(true, false,null), 1000);
     }
 
     @Override
     public void onError(Exception exception) {
-        Toast.makeText(PlaceActivity.this, "Error : " + exception.getMessage(), Toast.LENGTH_SHORT).show();
+        if (mInternetManager.isConnected()) {
+            Toast.makeText(PlaceActivity.this, "Error : " + exception.getMessage(), Toast.LENGTH_SHORT).show();
+        }
     }
 }

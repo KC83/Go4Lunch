@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -63,6 +64,12 @@ public class ListFragment extends Fragment implements ListPlacesAdapter.ListPlac
 
         // Initialize internet manager
         mInternetManager = new InternetManagerImpl(getContext());
+        if (!mInternetManager.isConnected()) {
+            TextView information = view.findViewById(R.id.fragment_list_information);
+            information.setText(R.string.error_no_internet);
+            information.setVisibility(View.VISIBLE);
+            return;
+        }
 
         // Initialize fused location
         FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(getContext());

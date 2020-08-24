@@ -18,6 +18,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -184,24 +185,25 @@ public class MapFragment extends Fragment {
 
             @Override
             public void onError(Exception exception) {
-                Toast.makeText(getContext(), "Error : "+exception.getMessage(), Toast.LENGTH_SHORT).show();
+                if (!internetManager.isConnected()) {
+                    Toast.makeText(getContext(), getString(R.string.error_no_internet), Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getContext(), "Error : "+exception.getMessage(), Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
         // Set "My location" button
         mMap.setMyLocationEnabled(true);
 
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                String placeId = (String) marker.getTag();
+        mMap.setOnMarkerClickListener(marker -> {
+            String placeId = (String) marker.getTag();
 
-                Intent intent = new Intent(getContext(), PlaceActivity.class);
-                intent.putExtra(Constants.PLACE_ID, placeId);
-                startActivity(intent);
+            Intent intent = new Intent(getContext(), PlaceActivity.class);
+            intent.putExtra(Constants.PLACE_ID, placeId);
+            startActivity(intent);
 
-                return false;
-            }
+            return false;
         });
     }
 

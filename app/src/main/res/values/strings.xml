@@ -21,6 +21,7 @@
     <string name="error_authentication_canceled">Authentification annulée…</string>
     <string name="error_no_internet">Aucune connexion internet !</string>
     <string name="error_unknown_error">Une erreur inconnue s\'est produite…</string>
+    <string name="loading">Chargement en cours</string>
     <string name="lunch">Repas</string>
     <string name="settings">Paramètres</string>
     <string name="logout">Déconnexion</string>
