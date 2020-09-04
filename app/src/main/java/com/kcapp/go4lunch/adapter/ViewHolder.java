@@ -21,10 +21,12 @@ import com.kcapp.go4lunch.R;
 import com.kcapp.go4lunch.api.places.ApiGooglePlaces;
 import com.kcapp.go4lunch.api.places.PlacesCallback;
 import com.kcapp.go4lunch.api.places.PlacesRepositoryImpl;
+import com.kcapp.go4lunch.api.services.App;
 import com.kcapp.go4lunch.api.services.CircleTransform;
 import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.api.services.InternetManager;
 import com.kcapp.go4lunch.api.services.InternetManagerImpl;
+import com.kcapp.go4lunch.model.PlaceLunch;
 import com.kcapp.go4lunch.model.User;
 import com.kcapp.go4lunch.model.places.GooglePlaceDetailResponse;
 import com.kcapp.go4lunch.model.places.GooglePlacesResponse;
@@ -176,8 +178,31 @@ class ViewHolder extends RecyclerView.ViewHolder {
         }
         mItemWorkmateTitle.setText(user.getUsername());
     }
+    void bind(User user, boolean isPlaceJoined, String placeId) {
+        if (user.getUrlPicture() != null) {
+            if (user.getUrlPicture().length() > 0) {
+                Picasso.with(mContext)
+                        .load(user.getUrlPicture())
+                        .transform(new CircleTransform())
+                        .into(mItemWorkmateImage);
+            } else {
+                mItemWorkmateImage.setImageResource(R.drawable.ic_no_photo);
+            }
+        } else {
+            mItemWorkmateImage.setImageResource(R.drawable.ic_no_photo);
+        }
 
+        if (isPlaceJoined) {
+            mItemWorkmateTitle.setText(String.format("%s %s", user.getUsername(), mContext.getString(R.string.place_joining)));
+        } else {
+            if (placeId != null) {
+                App.getNamePlace(mContext, placeId, placeName -> mItemWorkmateTitle.setText(String.format("%s (%s)", user.getUsername(), placeName)));
+            } else {
+                mItemWorkmateTitle.setText(String.format("%s %s", user.getUsername(), mContext.getString(R.string.place_dont_decided)));
+            }
+        }
 
+    }
 
     /**
      * Get image resource for a place

@@ -15,6 +15,9 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
@@ -22,23 +25,30 @@ import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.kcapp.go4lunch.adapter.ListWorkmatesLunchAdapter;
 import com.kcapp.go4lunch.api.helper.PlaceLikeHelper;
 import com.kcapp.go4lunch.api.helper.PlaceLunchHelper;
+import com.kcapp.go4lunch.api.helper.UserHelper;
 import com.kcapp.go4lunch.api.places.ApiGooglePlaces;
 import com.kcapp.go4lunch.api.places.PlacesCallback;
 import com.kcapp.go4lunch.api.places.PlacesRepositoryImpl;
+import com.kcapp.go4lunch.api.services.App;
 import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.api.services.InternetManager;
 import com.kcapp.go4lunch.api.services.InternetManagerImpl;
 import com.kcapp.go4lunch.model.PlaceLike;
 import com.kcapp.go4lunch.model.PlaceLunch;
+import com.kcapp.go4lunch.model.User;
 import com.kcapp.go4lunch.model.places.GooglePlaceDetailResponse;
 import com.kcapp.go4lunch.model.places.GooglePlacesResponse;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class PlaceActivity extends AppCompatActivity implements PlacesCallback {
     private ImageView mPlaceImage;
@@ -52,6 +62,10 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback {
     private Button mCallButton;
     private Button mLikeButton;
     private Button mWebsiteButton;
+
+    private RecyclerView mListWorkmates;
+    //private ListWorkmatesAdapter mListWorkmatesAdapter;
+    private ListWorkmatesLunchAdapter mListWorkmatesLunchAdapter;
 
     private FirebaseUser mFirebaseUser;
     private String mPlaceId;
@@ -83,6 +97,74 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback {
         placesRepository.getPlaceDetail(mPlaceId, this);
     }
 
+    @Override
+    public void onPlacesAvailable(GooglePlacesResponse places) {}
+
+    @Override
+    public void onPlaceDetailAvailable(GooglePlaceDetailResponse place) {
+        // PHOTO
+        if (place.getResult().getPhotos() != null) {
+            RequestManager requestManager = Glide.with(PlaceActivity.this);
+            requestManager
+                    .load(Constants.BASE_URL + Constants.PHOTO_SEARCH_URL + "maxwidth=400&photoreference=" + place.getResult().getPhotos().get(0).getPhotoReference() + "&key=" + Constants.GOOGLE_BROWSER_KEY)
+                    .into(mPlaceImage);
+        } else {
+            mPlaceImage.setImageResource(R.drawable.ic_no_photo);
+        }
+
+        // NAME
+        mPlaceName.setText(place.getResult().getName());
+        // ADDRESS
+        mPlaceAddress.setText(place.getResult().getVicinity());
+
+        // LIKE IMAGE
+        onLikeButtonClicked(false);
+
+        // BUTTON LUNCH
+        onLunchButtonClicked(false);
+        mLunchButton.setOnClickListener(view -> {
+            onLunchButtonClicked(true);
+        });
+
+        // BUTTONS
+        // Call button
+        mCallButton.setOnClickListener(view -> {
+            if (place.getResult().getFormattedPhoneNumber() != null) {
+                dialPhoneNumber(place.getResult().getFormattedPhoneNumber());
+            } else {
+                Toast.makeText(PlaceActivity.this, R.string.no_phone, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // Like button
+        mLikeButton.setOnClickListener(view -> {
+            onLikeButtonClicked(true);
+        });
+
+        // Website button
+        mWebsiteButton.setOnClickListener(view -> {
+            if (place.getResult().getWebsite() != null) {
+                openWebPage(place.getResult().getWebsite());
+            } else {
+                Toast.makeText(PlaceActivity.this, R.string.no_website, Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        // List of workmates
+        showListOfWorkmates();
+
+        // After 1s the elements are visible
+        final Handler handler = new Handler();
+        handler.postDelayed(() -> showElements(true, false,null), 1000);
+    }
+
+    @Override
+    public void onError(Exception exception) {
+        if (mInternetManager.isConnected()) {
+            Toast.makeText(PlaceActivity.this, "Error : " + exception.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
     /**
      * Init view
      */
@@ -91,10 +173,7 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback {
         mPlaceId = intent.getStringExtra(Constants.PLACE_ID);
         mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
 
-        @SuppressLint("SimpleDateFormat")
-        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date date = new Date();
-        mDate = dateFormat.format(date);
+        mDate = App.getTodayDate();
 
         mPlaceImage = findViewById(R.id.place_activity_place_image);
         mPlaceName = findViewById(R.id.place_activity_place_name);
@@ -107,6 +186,8 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback {
         mCallButton = findViewById(R.id.place_activity_call);
         mLikeButton = findViewById(R.id.place_activity_like);
         mWebsiteButton = findViewById(R.id.place_activity_website);
+
+        mListWorkmates = findViewById(R.id.place_activity_list_workmates);
     }
 
     /**
@@ -265,68 +346,33 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback {
         }
     }
 
-    @Override
-    public void onPlacesAvailable(GooglePlacesResponse places) {}
+    /**
+     * Show the list of workmates
+     */
+    public void showListOfWorkmates() {
+        Task<QuerySnapshot> query = PlaceLunchHelper.getPlaceLunch(mPlaceId, mDate);
+        query.addOnCompleteListener(task -> {
+            if (!task.getResult().isEmpty()) {
+                List<User> users = new ArrayList<>();
+                for (int i=0; i<task.getResult().size(); i++) {
+                    PlaceLunch placeLunch = task.getResult().getDocuments().get(i).toObject(PlaceLunch.class);
 
-    @Override
-    public void onPlaceDetailAvailable(GooglePlaceDetailResponse place) {
-        // PHOTO
-        if (place.getResult().getPhotos() != null) {
-            RequestManager requestManager = Glide.with(PlaceActivity.this);
-            requestManager
-                    .load(Constants.BASE_URL + Constants.PHOTO_SEARCH_URL + "maxwidth=400&photoreference=" + place.getResult().getPhotos().get(0).getPhotoReference() + "&key=" + Constants.GOOGLE_BROWSER_KEY)
-                    .into(mPlaceImage);
-        } else {
-            mPlaceImage.setImageResource(R.drawable.ic_no_photo);
-        }
+                    Task<DocumentSnapshot> documentSnapshotTask = UserHelper.getUser(placeLunch.getUserUid());
+                    documentSnapshotTask.addOnCompleteListener(task1 -> {
+                        User user = task1.getResult().toObject(User.class);
+                        users.add(user);
 
-        // NAME
-        mPlaceName.setText(place.getResult().getName());
-        // ADDRESS
-        mPlaceAddress.setText(place.getResult().getVicinity());
+                        mListWorkmatesLunchAdapter = new ListWorkmatesLunchAdapter(users, mPlaceId);
 
-        // LIKE IMAGE
-        onLikeButtonClicked(false);
+                        mListWorkmates.setLayoutManager(new LinearLayoutManager(this));
+                        mListWorkmates.setAdapter(mListWorkmatesLunchAdapter);
+                    });
+                }
 
-        // BUTTON LUNCH
-        onLunchButtonClicked(false);
-        mLunchButton.setOnClickListener(view -> {
-            onLunchButtonClicked(true);
-        });
-
-        // BUTTONS
-        // Call button
-        mCallButton.setOnClickListener(view -> {
-            if (place.getResult().getFormattedPhoneNumber() != null) {
-                dialPhoneNumber(place.getResult().getFormattedPhoneNumber());
-            } else {
-                Toast.makeText(PlaceActivity.this, R.string.no_phone, Toast.LENGTH_SHORT).show();
+                //mListWorkmatesAdapter = new ListWorkmatesAdapter(UserHelper.generateOptionsForAdapter(UserHelper.getUsersByUid(list),this));
             }
         });
 
-        // Like button
-        mLikeButton.setOnClickListener(view -> {
-            onLikeButtonClicked(true);
-        });
 
-        // Website button
-        mWebsiteButton.setOnClickListener(view -> {
-            if (place.getResult().getWebsite() != null) {
-                openWebPage(place.getResult().getWebsite());
-            } else {
-                Toast.makeText(PlaceActivity.this, R.string.no_website, Toast.LENGTH_SHORT).show();
-            }
-        });
-
-        // After 1s the elements are visible
-        final Handler handler = new Handler();
-        handler.postDelayed(() -> showElements(true, false,null), 1000);
-    }
-
-    @Override
-    public void onError(Exception exception) {
-        if (mInternetManager.isConnected()) {
-            Toast.makeText(PlaceActivity.this, "Error : " + exception.getMessage(), Toast.LENGTH_SHORT).show();
-        }
     }
 }

@@ -16,7 +16,7 @@ import static android.content.ContentValues.TAG;
 
 public class PlaceLunchHelper {
     // COLLECTION REFERENCE
-    private static CollectionReference getPlacesLunchCollection() {
+    public static CollectionReference getPlacesLunchCollection() {
         return FirebaseFirestore.getInstance().collection(Constants.PLACE_LUNCH_COLLECTION_NAME);
     }
     // CREATE
@@ -36,10 +36,42 @@ public class PlaceLunchHelper {
                 });
     }
     // GET
+
+    /**
+     * Get place lunch with a place and a date
+     * @param placeId
+     * @param date
+     * @return
+     */
+    public static Task<QuerySnapshot> getPlaceLunch(String placeId, String date) {
+        return PlaceLunchHelper.getPlacesLunchCollection()
+                .whereEqualTo("placeId", placeId)
+                .whereEqualTo("date", date)
+                .get();
+    }
+    /**
+     * Get place lunch with a user, a place and a date
+     * @param userUid
+     * @param placeId
+     * @param date
+     * @return
+     */
     public static Task<QuerySnapshot> getPlaceLunch(String userUid, String placeId, String date) {
         return PlaceLunchHelper.getPlacesLunchCollection()
                 .whereEqualTo("userUid", userUid)
                 .whereEqualTo("placeId", placeId)
+                .whereEqualTo("date", date)
+                .get();
+    }
+    /**
+     * Get the place of lunch for a user and a date
+     * @param userUid
+     * @param date
+     * @return
+     */
+    public static Task<QuerySnapshot> getUserPlaceLunch(String userUid, String date) {
+        return PlaceLunchHelper.getPlacesLunchCollection()
+                .whereEqualTo("userUid", userUid)
                 .whereEqualTo("date", date)
                 .get();
     }

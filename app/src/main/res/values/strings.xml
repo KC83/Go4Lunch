@@ -69,4 +69,6 @@
     <string name="success_add_place_lunch">PlaceLunch écrit avec l\'ID</string>
     <string name="error_add_place_like">Erreur en ajoutant un placeLike</string>
     <string name="error_add_place_lunch">Erreur en ajoutant un placeLunch</string>
+    <string name="place_joining">vient !</string>
+    <string name="place_dont_decided">n\'a pas encore décidé</string>
 </resources>

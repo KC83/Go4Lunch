@@ -13,6 +13,9 @@ import com.google.firebase.firestore.Query;
 import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.model.User;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class UserHelper {
 
     // COLLECTION REFERENCE
@@ -31,6 +34,29 @@ public class UserHelper {
     public static Query getAllUsers() {
         return UserHelper.getUsersCollection().orderBy("username", Query.Direction.ASCENDING);
     }
+    public static Query getUsersByUid(List<String> list) {
+        Query query = UserHelper.getUsersCollection();
+        for (int i=0; i<list.size(); i++) {
+            //query = query.whereEqualTo("uid",list.get(i));
+        }
+
+        //query = query.whereEqualTo("uid","MJSqkIqoMwS45Mrx56Xq").whereEqualTo("uid","p9x3jSboKiff1YcxpkKvwSRf0GB3");
+        //query = query.whereGreaterThanOrEqualTo("uid","MJSqkIqoMwS45Mrx56Xq").whereLessThanOrEqualTo("uid","p9x3jSboKiff1YcxpkKvwSRf0GB3");
+
+        return query;
+    }
+
+    /*
+    public static List<Query> getUsersByUid(List<String> list) {
+        List<Query> queries = new ArrayList<Query>();
+
+        for (int i=0; i<list.size(); i++) {
+            Query query = UserHelper.getUsersCollection().whereEqualTo("uid", list.get(i));
+            queries.add(query);
+        }
+
+        return queries;
+    }*/
 
     // DELETE
     public static Task<Void> deleteUser(String uid) {
@@ -44,4 +70,14 @@ public class UserHelper {
                 .setLifecycleOwner(lifecycleOwner)
                 .build();
     }
+    /*public static FirestoreRecyclerOptions<User> generateOptionsForAdapter(List<Query> queries, LifecycleOwner lifecycleOwner){
+        FirestoreRecyclerOptions.Builder<User> builder = new FirestoreRecyclerOptions.Builder<User>();
+        for (int i=0; i<queries.size(); i++) {
+            Query query = queries.get(i);
+            builder.setQuery(query, User.class);
+        }
+        builder.setLifecycleOwner(lifecycleOwner);
+
+        return builder.build();
+    }*/
 }

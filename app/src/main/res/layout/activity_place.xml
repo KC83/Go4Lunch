@@ -51,7 +51,7 @@
         app:layout_constraintTop_toBottomOf="@+id/place_activity_place_image" />
 
     <TextView
-        android:id="@+id/textView"
+        android:id="@+id/place_activity_textView"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@color/colorPrimary"
@@ -128,7 +128,7 @@
 
     <!-- List of workmates -->
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/list_workmates"
+        android:id="@+id/place_activity_list_workmates"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintBottom_toBottomOf="parent"

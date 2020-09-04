@@ -50,4 +50,6 @@
     <string name="success_add_place_lunch">PlaceLunch written with ID</string>
     <string name="error_add_place_lunch">Error adding placeLunch</string>
     <string name="loading">loading</string>
+    <string name="place_joining">is joining !</string>
+    <string name="place_dont_decided">hasn\'t decided yet</string>
 </resources>
