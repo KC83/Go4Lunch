@@ -1,10 +1,7 @@
 package com.kcapp.go4lunch.adapter;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.location.Location;
-import android.net.Uri;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -15,8 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-import com.bumptech.glide.load.resource.bitmap.RoundedCorners;
-import com.bumptech.glide.request.RequestOptions;
 import com.kcapp.go4lunch.R;
 import com.kcapp.go4lunch.api.places.ApiGooglePlaces;
 import com.kcapp.go4lunch.api.places.PlacesCallback;
@@ -26,20 +21,13 @@ import com.kcapp.go4lunch.api.services.CircleTransform;
 import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.api.services.InternetManager;
 import com.kcapp.go4lunch.api.services.InternetManagerImpl;
-import com.kcapp.go4lunch.model.PlaceLunch;
 import com.kcapp.go4lunch.model.User;
 import com.kcapp.go4lunch.model.places.GooglePlaceDetailResponse;
 import com.kcapp.go4lunch.model.places.GooglePlacesResponse;
 import com.kcapp.go4lunch.model.places.result.Result;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Transformation;
 
-import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Locale;
-
-import retrofit2.http.Url;
 
 class ViewHolder extends RecyclerView.ViewHolder {
     private View mItemView;
@@ -163,22 +151,7 @@ class ViewHolder extends RecyclerView.ViewHolder {
      * Set information for a workmate
      * @param user user
      */
-    void bind(User user) {
-        if (user.getUrlPicture() != null) {
-            if (user.getUrlPicture().length() > 0) {
-                Picasso.with(mContext)
-                        .load(user.getUrlPicture())
-                        .transform(new CircleTransform())
-                        .into(mItemWorkmateImage);
-            } else {
-                mItemWorkmateImage.setImageResource(R.drawable.ic_no_photo);
-            }
-        } else {
-            mItemWorkmateImage.setImageResource(R.drawable.ic_no_photo);
-        }
-        mItemWorkmateTitle.setText(user.getUsername());
-    }
-    void bind(User user, boolean isPlaceJoined, String placeId) {
+    void bind(User user, String activity) {
         if (user.getUrlPicture() != null) {
             if (user.getUrlPicture().length() > 0) {
                 Picasso.with(mContext)
@@ -192,16 +165,17 @@ class ViewHolder extends RecyclerView.ViewHolder {
             mItemWorkmateImage.setImageResource(R.drawable.ic_no_photo);
         }
 
-        if (isPlaceJoined) {
+        if (activity.equals(Constants.PLACE_ACTIVITY)) {
             mItemWorkmateTitle.setText(String.format("%s %s", user.getUsername(), mContext.getString(R.string.place_joining)));
-        } else {
-            if (placeId != null) {
-                App.getNamePlace(mContext, placeId, placeName -> mItemWorkmateTitle.setText(String.format("%s (%s)", user.getUsername(), placeName)));
+        } else if (activity.equals(Constants.WORKMATES_FRAMGMENT)) {
+            if (user.getPlaceId() != null && user.getPlaceDate() != null && user.getPlaceDate().equals(App.getTodayDate())) {
+                App.getNamePlace(mContext, user.getPlaceId(), placeName -> mItemWorkmateTitle.setText(String.format("%s (%s)", user.getUsername(), placeName)));
             } else {
                 mItemWorkmateTitle.setText(String.format("%s %s", user.getUsername(), mContext.getString(R.string.place_dont_decided)));
             }
+        } else {
+            mItemWorkmateTitle.setText(user.getUsername());
         }
-
     }
 
     /**

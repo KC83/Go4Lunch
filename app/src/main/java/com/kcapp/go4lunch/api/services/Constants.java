@@ -13,7 +13,6 @@ public final class Constants {
      */
     public static final String USER_COLLECTION_NAME = "users";
     public static final String PLACE_LIKE_COLLECTION_NAME = "placeLike";
-    public static final String PLACE_LUNCH_COLLECTION_NAME = "placeLunch";
 
     /**
      * GOOGLE MAPS
@@ -32,4 +31,10 @@ public final class Constants {
      * PLACE ACTIVITY
      */
     public static final String PLACE_ID = "placeId";
+    public static final String PLACE_ACTIVITY = "placeActivity";
+
+    /**
+     * WORKMATES FRAGMENT
+     */
+    public static final String WORKMATES_FRAMGMENT = "workmatesFragment";
 }

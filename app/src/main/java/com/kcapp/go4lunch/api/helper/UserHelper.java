@@ -1,7 +1,5 @@
 package com.kcapp.go4lunch.api.helper;
 
-import android.content.Context;
-
 import androidx.lifecycle.LifecycleOwner;
 
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
@@ -10,11 +8,9 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.kcapp.go4lunch.api.services.App;
 import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.model.User;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class UserHelper {
 
@@ -34,30 +30,24 @@ public class UserHelper {
     public static Query getAllUsers() {
         return UserHelper.getUsersCollection().orderBy("username", Query.Direction.ASCENDING);
     }
-    public static Query getUsersByUid(List<String> list) {
-        Query query = UserHelper.getUsersCollection();
-        for (int i=0; i<list.size(); i++) {
-            //query = query.whereEqualTo("uid",list.get(i));
-        }
-
-        //query = query.whereEqualTo("uid","MJSqkIqoMwS45Mrx56Xq").whereEqualTo("uid","p9x3jSboKiff1YcxpkKvwSRf0GB3");
-        //query = query.whereGreaterThanOrEqualTo("uid","MJSqkIqoMwS45Mrx56Xq").whereLessThanOrEqualTo("uid","p9x3jSboKiff1YcxpkKvwSRf0GB3");
-
-        return query;
+    public static Query getAllUsersForAPlace(String placeId) {
+        return UserHelper.getUsersCollection().whereEqualTo("placeId", placeId).whereEqualTo("placeDate", App.getTodayDate()).orderBy("username", Query.Direction.ASCENDING);
     }
+    // UPDATE
+    public static Task<Void> updatePlace(String uid, String placeId, String date) {
+        Task<DocumentSnapshot> documentSnapshotTask = UserHelper.getUser(uid);
+        documentSnapshotTask.addOnCompleteListener(task -> {
+           if (task.getResult().exists()) {
+               User user = task.getResult().toObject(User.class);
+               user.setPlaceId(placeId);
+               user.setPlaceDate(date);
 
-    /*
-    public static List<Query> getUsersByUid(List<String> list) {
-        List<Query> queries = new ArrayList<Query>();
+               UserHelper.getUsersCollection().document(uid).set(user);
+           }
+        });
 
-        for (int i=0; i<list.size(); i++) {
-            Query query = UserHelper.getUsersCollection().whereEqualTo("uid", list.get(i));
-            queries.add(query);
-        }
-
-        return queries;
-    }*/
-
+        return null;
+    }
     // DELETE
     public static Task<Void> deleteUser(String uid) {
         return UserHelper.getUsersCollection().document(uid).delete();
@@ -70,14 +60,4 @@ public class UserHelper {
                 .setLifecycleOwner(lifecycleOwner)
                 .build();
     }
-    /*public static FirestoreRecyclerOptions<User> generateOptionsForAdapter(List<Query> queries, LifecycleOwner lifecycleOwner){
-        FirestoreRecyclerOptions.Builder<User> builder = new FirestoreRecyclerOptions.Builder<User>();
-        for (int i=0; i<queries.size(); i++) {
-            Query query = queries.get(i);
-            builder.setQuery(query, User.class);
-        }
-        builder.setLifecycleOwner(lifecycleOwner);
-
-        return builder.build();
-    }*/
 }

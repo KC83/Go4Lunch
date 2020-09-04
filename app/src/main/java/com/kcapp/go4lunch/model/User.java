@@ -9,6 +9,10 @@ public class User {
     private String email;
     @Nullable
     private String urlPicture;
+    @Nullable
+    private String placeId;
+    @Nullable
+    private String placeDate;
 
     public User() { }
 
@@ -17,6 +21,15 @@ public class User {
         this.username = username;
         this.email = email;
         this.urlPicture = urlPicture;
+    }
+
+    public User(String uid, String username, @Nullable String email, @Nullable String urlPicture, @Nullable String placeId, @Nullable String placeDate) {
+        this.uid = uid;
+        this.username = username;
+        this.email = email;
+        this.urlPicture = urlPicture;
+        this.placeId = placeId;
+        this.placeDate = placeDate;
     }
 
     /*** GETTERS ***/
@@ -34,6 +47,14 @@ public class User {
     public String getUrlPicture() {
         return urlPicture;
     }
+    @Nullable
+    public String getPlaceId() {
+        return placeId;
+    }
+    @Nullable
+    public String getPlaceDate() {
+        return placeDate;
+    }
 
     /*** SETTERS ***/
     public void setUid(String uid) {
@@ -47,5 +68,11 @@ public class User {
     }
     public void setUrlPicture(@Nullable String urlPicture) {
         this.urlPicture = urlPicture;
+    }
+    public void setPlaceId(@Nullable String placeId) {
+        this.placeId = placeId;
+    }
+    public void setPlaceDate(@Nullable String placeDate) {
+        this.placeDate = placeDate;
     }
 }

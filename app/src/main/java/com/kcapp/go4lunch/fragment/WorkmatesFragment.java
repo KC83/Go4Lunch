@@ -16,6 +16,7 @@ import android.widget.TextView;
 import com.kcapp.go4lunch.R;
 import com.kcapp.go4lunch.adapter.ListWorkmatesAdapter;
 import com.kcapp.go4lunch.api.helper.UserHelper;
+import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.api.services.InternetManager;
 import com.kcapp.go4lunch.api.services.InternetManagerImpl;
 
@@ -41,7 +42,7 @@ public class WorkmatesFragment extends Fragment {
             return;
         }
 
-        mListWorkmatesAdapter = new ListWorkmatesAdapter(UserHelper.generateOptionsForAdapter(UserHelper.getAllUsers(),this));
+        mListWorkmatesAdapter = new ListWorkmatesAdapter(UserHelper.generateOptionsForAdapter(UserHelper.getAllUsers(),this), Constants.WORKMATES_FRAMGMENT);
 
         mListWorkmates = view.findViewById(R.id.list_workmates);
         mListWorkmates.setLayoutManager(new LinearLayoutManager(getContext()));

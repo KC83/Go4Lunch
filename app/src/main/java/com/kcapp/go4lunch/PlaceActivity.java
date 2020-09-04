@@ -1,6 +1,5 @@
 package com.kcapp.go4lunch;
 
-import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,7 +14,6 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -27,9 +25,8 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.kcapp.go4lunch.adapter.ListWorkmatesLunchAdapter;
+import com.kcapp.go4lunch.adapter.ListWorkmatesAdapter;
 import com.kcapp.go4lunch.api.helper.PlaceLikeHelper;
-import com.kcapp.go4lunch.api.helper.PlaceLunchHelper;
 import com.kcapp.go4lunch.api.helper.UserHelper;
 import com.kcapp.go4lunch.api.places.ApiGooglePlaces;
 import com.kcapp.go4lunch.api.places.PlacesCallback;
@@ -39,16 +36,9 @@ import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.api.services.InternetManager;
 import com.kcapp.go4lunch.api.services.InternetManagerImpl;
 import com.kcapp.go4lunch.model.PlaceLike;
-import com.kcapp.go4lunch.model.PlaceLunch;
 import com.kcapp.go4lunch.model.User;
 import com.kcapp.go4lunch.model.places.GooglePlaceDetailResponse;
 import com.kcapp.go4lunch.model.places.GooglePlacesResponse;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
 
 public class PlaceActivity extends AppCompatActivity implements PlacesCallback {
     private ImageView mPlaceImage;
@@ -64,12 +54,9 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback {
     private Button mWebsiteButton;
 
     private RecyclerView mListWorkmates;
-    //private ListWorkmatesAdapter mListWorkmatesAdapter;
-    private ListWorkmatesLunchAdapter mListWorkmatesLunchAdapter;
 
     private FirebaseUser mFirebaseUser;
     private String mPlaceId;
-    private String mDate;
 
     private boolean mIsPlaceLiked;
     private boolean mIsPlaceLunch;
@@ -102,6 +89,48 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback {
 
     @Override
     public void onPlaceDetailAvailable(GooglePlaceDetailResponse place) {
+        setValues(place);
+
+        // After 1s the elements are visible
+        final Handler handler = new Handler();
+        handler.postDelayed(() -> showElements(true, false,null), 1000);
+    }
+
+    @Override
+    public void onError(Exception exception) {
+        if (mInternetManager.isConnected()) {
+            Toast.makeText(PlaceActivity.this, "Error : " + exception.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    /**
+     * Init view
+     */
+    private void initView() {
+        Intent intent = getIntent();
+        mPlaceId = intent.getStringExtra(Constants.PLACE_ID);
+        mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+
+        mPlaceImage = findViewById(R.id.place_activity_place_image);
+        mPlaceName = findViewById(R.id.place_activity_place_name);
+        mPlaceAddress = findViewById(R.id.place_activity_place_address);
+
+        mInformation = findViewById(R.id.place_activity_information);
+        mProgressBar = findViewById(R.id.place_activity_progress_bar);
+        mLunchButton = findViewById(R.id.place_activity_lunch);
+
+        mCallButton = findViewById(R.id.place_activity_call);
+        mLikeButton = findViewById(R.id.place_activity_like);
+        mWebsiteButton = findViewById(R.id.place_activity_website);
+
+        mListWorkmates = findViewById(R.id.place_activity_list_workmates);
+    }
+
+    /**
+     * Set values to the view
+     * @param place the google place selected
+     */
+    private void setValues(GooglePlaceDetailResponse place) {
         // PHOTO
         if (place.getResult().getPhotos() != null) {
             RequestManager requestManager = Glide.with(PlaceActivity.this);
@@ -152,42 +181,6 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback {
 
         // List of workmates
         showListOfWorkmates();
-
-        // After 1s the elements are visible
-        final Handler handler = new Handler();
-        handler.postDelayed(() -> showElements(true, false,null), 1000);
-    }
-
-    @Override
-    public void onError(Exception exception) {
-        if (mInternetManager.isConnected()) {
-            Toast.makeText(PlaceActivity.this, "Error : " + exception.getMessage(), Toast.LENGTH_SHORT).show();
-        }
-    }
-
-    /**
-     * Init view
-     */
-    private void initView() {
-        Intent intent = getIntent();
-        mPlaceId = intent.getStringExtra(Constants.PLACE_ID);
-        mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
-
-        mDate = App.getTodayDate();
-
-        mPlaceImage = findViewById(R.id.place_activity_place_image);
-        mPlaceName = findViewById(R.id.place_activity_place_name);
-        mPlaceAddress = findViewById(R.id.place_activity_place_address);
-
-        mInformation = findViewById(R.id.place_activity_information);
-        mProgressBar = findViewById(R.id.place_activity_progress_bar);
-        mLunchButton = findViewById(R.id.place_activity_lunch);
-
-        mCallButton = findViewById(R.id.place_activity_call);
-        mLikeButton = findViewById(R.id.place_activity_like);
-        mWebsiteButton = findViewById(R.id.place_activity_website);
-
-        mListWorkmates = findViewById(R.id.place_activity_list_workmates);
     }
 
     /**
@@ -282,32 +275,28 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback {
      * @param isClicked if true, the "place lunch" is created or deleted
      */
     private void onLunchButtonClicked(boolean isClicked) {
-        Task<QuerySnapshot> query = PlaceLunchHelper.getPlaceLunch(mFirebaseUser.getUid(), mPlaceId, mDate);
-        query.addOnCompleteListener(task -> {
+        Task<DocumentSnapshot> documentSnapshotTask = UserHelper.getUser(mFirebaseUser.getUid());
+        documentSnapshotTask.addOnCompleteListener(task -> {
+            User user = task.getResult().toObject(User.class);
 
-            if (task.getResult().isEmpty()) {
+            // Current user is going to this place today
+            if (user.getPlaceId() != null && user.getPlaceDate() != null && user.getPlaceId().equals(mPlaceId) && user.getPlaceDate().equals(App.getTodayDate())) {
+                mIsPlaceLunch = true;
+
+                // If clicked, the current user don't go there anymore
                 if (isClicked) {
-                    // Create action
-                    PlaceLunchHelper.createPlaceLunch(mFirebaseUser.getUid(), mPlaceId, mDate);
-
-                    // Set to true
-                    mIsPlaceLunch = true;
-                } else {
                     mIsPlaceLunch = false;
+                    // Update place, remove placeId and placeDate
+                    UserHelper.updatePlace(mFirebaseUser.getUid(), null, null);
                 }
             } else {
+                mIsPlaceLunch = false;
+
+                // If clicked, the current user go there
                 if (isClicked) {
-                    PlaceLunch placeLunch = task.getResult().getDocuments().get(0).toObject(PlaceLunch.class);
-                    placeLunch.setUid(task.getResult().getDocuments().get(0).getId());
-
-                    // Delete action
-                    PlaceLunchHelper.deletePlaceLunch(placeLunch.getUid());
-
-                    // Set to false
-                    mIsPlaceLunch = false;
-                } else {
-                    // Set to true
                     mIsPlaceLunch = true;
+                    // Update place
+                    UserHelper.updatePlace(mFirebaseUser.getUid(), mPlaceId, App.getTodayDate());
                 }
             }
 
@@ -350,29 +339,9 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback {
      * Show the list of workmates
      */
     public void showListOfWorkmates() {
-        Task<QuerySnapshot> query = PlaceLunchHelper.getPlaceLunch(mPlaceId, mDate);
-        query.addOnCompleteListener(task -> {
-            if (!task.getResult().isEmpty()) {
-                List<User> users = new ArrayList<>();
-                for (int i=0; i<task.getResult().size(); i++) {
-                    PlaceLunch placeLunch = task.getResult().getDocuments().get(i).toObject(PlaceLunch.class);
+        ListWorkmatesAdapter listWorkmatesAdapter = new ListWorkmatesAdapter(UserHelper.generateOptionsForAdapter(UserHelper.getAllUsersForAPlace(mPlaceId), this), Constants.PLACE_ACTIVITY);
 
-                    Task<DocumentSnapshot> documentSnapshotTask = UserHelper.getUser(placeLunch.getUserUid());
-                    documentSnapshotTask.addOnCompleteListener(task1 -> {
-                        User user = task1.getResult().toObject(User.class);
-                        users.add(user);
-
-                        mListWorkmatesLunchAdapter = new ListWorkmatesLunchAdapter(users, mPlaceId);
-
-                        mListWorkmates.setLayoutManager(new LinearLayoutManager(this));
-                        mListWorkmates.setAdapter(mListWorkmatesLunchAdapter);
-                    });
-                }
-
-                //mListWorkmatesAdapter = new ListWorkmatesAdapter(UserHelper.generateOptionsForAdapter(UserHelper.getUsersByUid(list),this));
-            }
-        });
-
-
+        mListWorkmates.setLayoutManager(new LinearLayoutManager(this));
+        mListWorkmates.setAdapter(listWorkmatesAdapter);
     }
 }
