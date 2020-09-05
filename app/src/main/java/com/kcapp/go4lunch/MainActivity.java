@@ -60,9 +60,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             // Check permission
             checkLocationPermission();
-
-            // Set default fragment when the app is open
-            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new MapFragment()).commit();
         }
     }
 
@@ -200,6 +197,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // If the user didn't accept the permission
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Constants.LOCATION_CODE);
+        } else {
+            // Set default fragment when the app is open
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new MapFragment()).commit();
         }
     }
 
