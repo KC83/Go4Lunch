@@ -34,7 +34,10 @@ public final class Constants {
     public static final String PLACE_ACTIVITY = "placeActivity";
 
     /**
-     * WORKMATES FRAGMENT
+     * FRAGMENTS
      */
     public static final String WORKMATES_FRAMGMENT = "workmatesFragment";
+    public static final int CODE_REQUEST_MAP_FRAGMENT = 2000;
+    public static final int CODE_REQUEST_LIST_FRAGMENT = 3000;
+    public static final int CODE_REQUEST_WORKMATES_FRAGMENT = 4000;
 }

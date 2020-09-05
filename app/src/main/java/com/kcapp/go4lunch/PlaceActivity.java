@@ -40,7 +40,7 @@ import com.kcapp.go4lunch.model.User;
 import com.kcapp.go4lunch.model.places.GooglePlaceDetailResponse;
 import com.kcapp.go4lunch.model.places.GooglePlacesResponse;
 
-public class PlaceActivity extends AppCompatActivity implements PlacesCallback {
+public class PlaceActivity extends AppCompatActivity implements PlacesCallback, ListWorkmatesAdapter.ListWorkmatesListener {
     private ImageView mPlaceImage;
     private TextView mPlaceName;
     private TextView mPlaceAddress;
@@ -153,6 +153,9 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback {
         onLunchButtonClicked(false);
         mLunchButton.setOnClickListener(view -> {
             onLunchButtonClicked(true);
+            // After 1s the elements are visible
+            final Handler handler = new Handler();
+            handler.postDelayed(this::showListOfWorkmates, 1000);
         });
 
         // BUTTONS
@@ -339,9 +342,12 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback {
      * Show the list of workmates
      */
     public void showListOfWorkmates() {
-        ListWorkmatesAdapter listWorkmatesAdapter = new ListWorkmatesAdapter(UserHelper.generateOptionsForAdapter(UserHelper.getAllUsersForAPlace(mPlaceId), this), Constants.PLACE_ACTIVITY);
+        ListWorkmatesAdapter listWorkmatesAdapter = new ListWorkmatesAdapter(UserHelper.generateOptionsForAdapter(UserHelper.getAllUsersForAPlace(mPlaceId), this), Constants.PLACE_ACTIVITY, PlaceActivity.this);
 
         mListWorkmates.setLayoutManager(new LinearLayoutManager(this));
         mListWorkmates.setAdapter(listWorkmatesAdapter);
     }
+
+    @Override
+    public void onClick(String placeId) {}
 }

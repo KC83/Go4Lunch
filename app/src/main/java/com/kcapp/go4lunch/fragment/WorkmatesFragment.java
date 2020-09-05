@@ -1,5 +1,6 @@
 package com.kcapp.go4lunch.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -13,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.kcapp.go4lunch.PlaceActivity;
 import com.kcapp.go4lunch.R;
 import com.kcapp.go4lunch.adapter.ListWorkmatesAdapter;
 import com.kcapp.go4lunch.api.helper.UserHelper;
@@ -20,9 +22,10 @@ import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.api.services.InternetManager;
 import com.kcapp.go4lunch.api.services.InternetManagerImpl;
 
-public class WorkmatesFragment extends Fragment {
+public class WorkmatesFragment extends Fragment implements ListWorkmatesAdapter.ListWorkmatesListener {
     RecyclerView mListWorkmates;
     ListWorkmatesAdapter mListWorkmatesAdapter;
+    ListWorkmatesAdapter.ListWorkmatesListener mListWorkmatesListener;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -42,9 +45,32 @@ public class WorkmatesFragment extends Fragment {
             return;
         }
 
-        mListWorkmatesAdapter = new ListWorkmatesAdapter(UserHelper.generateOptionsForAdapter(UserHelper.getAllUsers(),this), Constants.WORKMATES_FRAMGMENT);
-
         mListWorkmates = view.findViewById(R.id.list_workmates);
+        // Show the list of workmates
+        showWorkmates();
+    }
+
+    @Override
+    public void onClick(String placeId) {
+        Intent intent = new Intent(getContext(), PlaceActivity.class);
+        intent.putExtra(Constants.PLACE_ID, placeId);
+        startActivityForResult(intent, Constants.CODE_REQUEST_WORKMATES_FRAGMENT);
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == Constants.CODE_REQUEST_WORKMATES_FRAGMENT) {
+            showWorkmates();
+        }
+    }
+
+    /**
+     * Show the list of workmates
+     */
+    public void showWorkmates() {
+        mListWorkmatesAdapter = new ListWorkmatesAdapter(UserHelper.generateOptionsForAdapter(UserHelper.getAllUsers(),this), Constants.WORKMATES_FRAMGMENT, WorkmatesFragment.this);
+
         mListWorkmates.setLayoutManager(new LinearLayoutManager(getContext()));
         mListWorkmates.setAdapter(mListWorkmatesAdapter);
     }

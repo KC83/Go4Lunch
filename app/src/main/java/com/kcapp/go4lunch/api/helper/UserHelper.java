@@ -8,6 +8,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.kcapp.go4lunch.api.services.App;
 import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.model.User;
@@ -33,8 +34,12 @@ public class UserHelper {
     public static Query getAllUsersForAPlace(String placeId) {
         return UserHelper.getUsersCollection().whereEqualTo("placeId", placeId).whereEqualTo("placeDate", App.getTodayDate()).orderBy("username", Query.Direction.ASCENDING);
     }
+    public static Task<QuerySnapshot> getAllUsersForAPlaceForTask(String placeId) {
+        return UserHelper.getUsersCollection().whereEqualTo("placeId", placeId).whereEqualTo("placeDate", App.getTodayDate()).get();
+    }
+
     // UPDATE
-    public static Task<Void> updatePlace(String uid, String placeId, String date) {
+    public static void updatePlace(String uid, String placeId, String date) {
         Task<DocumentSnapshot> documentSnapshotTask = UserHelper.getUser(uid);
         documentSnapshotTask.addOnCompleteListener(task -> {
            if (task.getResult().exists()) {
@@ -46,7 +51,6 @@ public class UserHelper {
            }
         });
 
-        return null;
     }
     // DELETE
     public static Task<Void> deleteUser(String uid) {

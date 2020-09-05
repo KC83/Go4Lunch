@@ -93,17 +93,25 @@ public class ListFragment extends Fragment implements ListPlacesAdapter.ListPlac
             mApiGooglePlaces = ApiGooglePlaces.retrofit.create(ApiGooglePlaces.class);
 
             // Get results and set them into the list
-            setResults(view);
+            mListPlaces = view.findViewById(R.id.list_places);
+            setResults();
         });
 
         super.onViewCreated(view, savedInstanceState);
     }
 
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == Constants.CODE_REQUEST_LIST_FRAGMENT) {
+            setResults();
+        }
+    }
+
     /**
      * Get results and set them into the recyclerview
-     * @param view the view of the fragment
      */
-    private void setResults(View view) {
+    private void setResults() {
         mPlacesRepository = new PlacesRepositoryImpl(mInternetManager, mApiGooglePlaces);
         mPlacesRepository.getPlaces(mLocation, new PlacesCallback() {
             @Override
@@ -111,7 +119,6 @@ public class ListFragment extends Fragment implements ListPlacesAdapter.ListPlac
                 mResults = places.getResults();
                 mListPlacesAdapter = new ListPlacesAdapter(mResults, getContext(), mLat, mLng, ListFragment.this);
 
-                mListPlaces = view.findViewById(R.id.list_places);
                 mListPlaces.setLayoutManager(new LinearLayoutManager(getContext()));
                 mListPlaces.setAdapter(mListPlacesAdapter);
             }
@@ -130,6 +137,6 @@ public class ListFragment extends Fragment implements ListPlacesAdapter.ListPlac
     public void onClick(String placeId) {
         Intent intent = new Intent(getContext(), PlaceActivity.class);
         intent.putExtra(Constants.PLACE_ID, placeId);
-        startActivity(intent);
+        startActivityForResult(intent, Constants.CODE_REQUEST_LIST_FRAGMENT);
     }
 }

@@ -40,6 +40,7 @@ import com.kcapp.go4lunch.api.places.ApiGooglePlaces;
 import com.kcapp.go4lunch.api.places.PlacesCallback;
 import com.kcapp.go4lunch.api.places.PlacesRepository;
 import com.kcapp.go4lunch.api.places.PlacesRepositoryImpl;
+import com.kcapp.go4lunch.api.services.App;
 import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.api.services.InternetManager;
 import com.kcapp.go4lunch.api.services.InternetManagerImpl;
@@ -101,6 +102,15 @@ public class MapFragment extends Fragment {
             // Get the current location
             getCurrentLocation();
             // Get places
+            getPlaces();
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == Constants.CODE_REQUEST_MAP_FRAGMENT) {
             getPlaces();
         }
     }
@@ -176,7 +186,9 @@ public class MapFragment extends Fragment {
             @Override
             public void onPlacesAvailable(GooglePlacesResponse places) {
                 for (Result result : places.getResults()) {
-                    showPlace(result);
+                     App.getCountOfReservation(result.getPlaceId(), count -> {
+                         showPlace(result, count);
+                    });
                 }
             }
 
@@ -198,10 +210,12 @@ public class MapFragment extends Fragment {
 
         mMap.setOnMarkerClickListener(marker -> {
             String placeId = (String) marker.getTag();
+            marker.hideInfoWindow();
+
 
             Intent intent = new Intent(getContext(), PlaceActivity.class);
             intent.putExtra(Constants.PLACE_ID, placeId);
-            startActivity(intent);
+            startActivityForResult(intent, Constants.CODE_REQUEST_MAP_FRAGMENT);
 
             return false;
         });
@@ -211,16 +225,19 @@ public class MapFragment extends Fragment {
      * Show places on map
      * @param result a google place
      */
-    private void showPlace(Result result) {
+    private void showPlace(Result result, int count) {
         MarkerOptions markerOptions = new MarkerOptions();
 
         // Set position, title and icon of the place
         LatLng latLng = new LatLng(result.getGeometry().getLocation().getLat(), result.getGeometry().getLocation().getLng());
         markerOptions.position(latLng);
 
-        markerOptions.title(result.getName() + " : " + result.getVicinity());
-        markerOptions.icon(getMarkerIconFromDrawable(getResources().getDrawable(R.drawable.ic_marker_red)));
-        //markerOptions.icon(getMarkerIconFromDrawable(getResources().getDrawable(R.drawable.ic_marker_green)));
+        //markerOptions.title(result.getName() + " : " + result.getVicinity());
+        if (count > 0) {
+            markerOptions.icon(getMarkerIconFromDrawable(getResources().getDrawable(R.drawable.ic_marker_green)));
+        } else {
+            markerOptions.icon(getMarkerIconFromDrawable(getResources().getDrawable(R.drawable.ic_marker_red)));
+        }
 
         // Put the place on the map
         Marker marker = mMap.addMarker(markerOptions);

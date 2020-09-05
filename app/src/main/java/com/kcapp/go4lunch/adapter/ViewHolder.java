@@ -1,6 +1,7 @@
 package com.kcapp.go4lunch.adapter;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.view.View;
 import android.widget.ImageView;
@@ -99,6 +100,15 @@ class ViewHolder extends RecyclerView.ViewHolder {
                 mItemPlaceAddress.setText(result.getVicinity());
                 mItemPlaceWorkmates.setVisibility(View.INVISIBLE);
                 mItemPlaceNumberWorkmates.setText(null);
+                App.getCountOfReservation(result.getPlaceId(), new App.GetCountOfReservationCallback() {
+                    @Override
+                    public void onComplete(int count) {
+                        if (count > 0) {
+                            mItemPlaceNumberWorkmates.setText(String.format("(%s)", count));
+                            mItemPlaceWorkmates.setVisibility(View.VISIBLE);
+                        }
+                    }
+                });
 
                 // OPENING HOURS
                 if (place.getResult().getOpeningHours() != null) {
@@ -170,8 +180,10 @@ class ViewHolder extends RecyclerView.ViewHolder {
         } else if (activity.equals(Constants.WORKMATES_FRAMGMENT)) {
             if (user.getPlaceId() != null && user.getPlaceDate() != null && user.getPlaceDate().equals(App.getTodayDate())) {
                 App.getNamePlace(mContext, user.getPlaceId(), placeName -> mItemWorkmateTitle.setText(String.format("%s (%s)", user.getUsername(), placeName)));
+                mItemWorkmateTitle.setTypeface(mItemWorkmateTitle.getTypeface(), Typeface.BOLD);
             } else {
                 mItemWorkmateTitle.setText(String.format("%s %s", user.getUsername(), mContext.getString(R.string.place_dont_decided)));
+                mItemWorkmateTitle.setTypeface(mItemWorkmateTitle.getTypeface(), Typeface.ITALIC);
             }
         } else {
             mItemWorkmateTitle.setText(user.getUsername());

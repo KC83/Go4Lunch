@@ -71,8 +71,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="@string/place_number_workmates"
+        android:textStyle="bold"
+        android:textColor="@color/colorAccentGray"
         android:paddingEnd="15dp"
-        android:paddingStart="10dp"
+        android:paddingStart="2dp"
         app:layout_constraintEnd_toStartOf="@id/item_place_cardview"
         app:layout_constraintBottom_toBottomOf="@id/item_place_address"
         app:layout_constraintTop_toTopOf="@id/item_place_address" />
