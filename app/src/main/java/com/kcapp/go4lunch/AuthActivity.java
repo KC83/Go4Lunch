@@ -37,11 +37,9 @@ public class AuthActivity extends AppCompatActivity {
     private void initButtons() {
         Button facebookButton = findViewById(R.id.auth_activity_button_login_facebook);
         Button googleButton = findViewById(R.id.auth_activity_button_login_google);
-        Button twitterButton = findViewById(R.id.auth_activity_button_login_twitter);
 
         facebookButton.setOnClickListener(v -> authWithFacebook());
         googleButton.setOnClickListener(v -> authWithGoogle());
-        twitterButton.setOnClickListener(v -> authWithTwitter());
     }
     private void authWithFacebook() {
         Log.d("TAG", "AuthActivity::authWithFacebook");
@@ -61,17 +59,6 @@ public class AuthActivity extends AppCompatActivity {
                         .createSignInIntentBuilder()
                         .setAvailableProviders(
                                 Collections.singletonList(new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()))
-                        .setIsSmartLockEnabled(false, true)
-                        .build(),
-                Constants.RC_SIGN_IN);
-    }
-    private void authWithTwitter() {
-        Log.d("TAG", "AuthActivity::authWithTwitter");
-        startActivityForResult(
-                AuthUI.getInstance()
-                        .createSignInIntentBuilder()
-                        .setAvailableProviders(
-                                Collections.singletonList(new AuthUI.IdpConfig.Builder(AuthUI.TWITTER_PROVIDER).build()))
                         .setIsSmartLockEnabled(false, true)
                         .build(),
                 Constants.RC_SIGN_IN);

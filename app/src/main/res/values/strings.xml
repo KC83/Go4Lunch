@@ -5,10 +5,6 @@
     <string name="facebook_app_id" translatable="false">747782012628133</string>
     <string name="fb_login_protocol_scheme" translatable="false">fb747782012628133</string>
 
-    <!-- TWITTER LOGIN -->
-    <string name="twitter_consumer_key" translatable="false">C8ixsJ4lYEVMwECjghVaSPUwF</string>
-    <string name="twitter_consumer_secret" translatable="false">dtWTBf0IFc82N7Bb0E3UbYUhPzqQY8FOEbwoiFcGiUcTrIyA2O</string>
-
     <!-- GOOGLE -->
     <string name="google_browser_key" translatable="false">AIzaSyBSlvem5jVlKoFGpiIS_2-tj8Q9xhPlcEw</string>
 
@@ -16,7 +12,6 @@
     <string name="main_activity_logo">Logo de l\'application</string>
     <string name="button_login_facebook">Se connecter avec Facebook</string>
     <string name="button_login_google">Se connecter avec Google</string>
-    <string name="button_login_twitter">Se connecter avec Twitter</string>
     <string name="connection_succeed">Authentification réussie !</string>
     <string name="error_authentication_canceled">Authentification annulée…</string>
     <string name="error_no_internet">Aucune connexion internet !</string>

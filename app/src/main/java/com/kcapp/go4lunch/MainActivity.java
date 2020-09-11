@@ -63,6 +63,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             // Check permission
             checkLocationPermission();
+
+            //Places.initialize(getApplicationContext(), getString(R.string.google_api_key));
         }
     }
 
@@ -113,11 +115,35 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             @Override
             public boolean onQueryTextChange(String s) {
+               /* List<Place.Field> fieldList = Arrays.asList(Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.NAME);
+                Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fieldList).build(MainActivity.this);
+                startActivityForResult(intent, Constants.CODE_REQUEST_AUTOCOMPLETE);
+*/
+
                 return false;
             }
         });
 
         return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        /*if (requestCode == Constants.CODE_REQUEST_AUTOCOMPLETE) {
+            if (resultCode == RESULT_OK) {
+                Place place = Autocomplete.getPlaceFromIntent(data);
+                System.out.println("Place: " + place.getName() + ", " + place.getId());
+            } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
+                // TODO: Handle the error.
+                Status status = Autocomplete.getStatusFromIntent(data);
+                System.out.println(status.getStatusMessage());
+            } else if (resultCode == RESULT_CANCELED) {
+                // The user canceled the operation.
+            }
+            return;
+        }*/
+
+        super.onActivityResult(requestCode, resultCode, data);
     }
 
     /**

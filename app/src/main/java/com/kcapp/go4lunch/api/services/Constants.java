@@ -28,6 +28,11 @@ public final class Constants {
     public static final String GOOGLE_BROWSER_KEY = "AIzaSyBSlvem5jVlKoFGpiIS_2-tj8Q9xhPlcEw";
 
     /**
+     * MAIN ACTIVITY
+     */
+    public static int CODE_REQUEST_AUTOCOMPLETE = 5000;
+
+    /**
      * PLACE ACTIVITY
      */
     public static final String PLACE_ID = "placeId";
