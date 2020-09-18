@@ -51,4 +51,5 @@
     <string name="loading">loading</string>
     <string name="place_joining">is joining !</string>
     <string name="place_dont_decided">hasn\'t decided yet</string>
+    <string name="place_not_selected">You still hasn\'t selected a restaurant</string>
 </resources>

@@ -4,13 +4,18 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.kcapp.go4lunch.api.helper.UserHelper;
 import com.kcapp.go4lunch.api.places.ApiGooglePlaces;
 import com.kcapp.go4lunch.api.places.PlacesCallback;
 import com.kcapp.go4lunch.api.places.PlacesRepositoryImpl;
+import com.kcapp.go4lunch.model.User;
 import com.kcapp.go4lunch.model.places.GooglePlaceDetailResponse;
 import com.kcapp.go4lunch.model.places.GooglePlacesResponse;
+import com.kcapp.go4lunch.model.places.result.Result;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -27,6 +32,10 @@ public class App {
         Date date = new Date();
 
         return dateFormat.format(date);
+    }
+
+    public static FirebaseUser getFirebaseUser() {
+        return FirebaseAuth.getInstance().getCurrentUser();
     }
 
     /**
@@ -72,7 +81,40 @@ public class App {
     public static void getCountOfReservation(String placeId, GetCountOfReservationCallback callback) {
         Task<QuerySnapshot> querySnapshotTask = UserHelper.getAllUsersForAPlaceForTask(placeId);
         querySnapshotTask.addOnCompleteListener(task -> {
-            callback.onComplete(task.getResult().size());
+            if (task.getResult() != null) {
+                callback.onComplete(task.getResult().size());
+            } else {
+                callback.onComplete(0);
+            }
         });
+    }
+
+    /**
+     * Interface to get the place of the current user
+     */
+    public interface GetUserPlaceCallback {
+        void onCompleted(String placeId);
+    }
+    public static void getUserPlace(GetUserPlaceCallback callback) {
+        FirebaseUser firebaseUser = App.getFirebaseUser();
+        if (firebaseUser != null) {
+            Task<DocumentSnapshot> documentSnapshotTask = UserHelper.getUser(firebaseUser.getUid());
+            documentSnapshotTask.addOnCompleteListener(task -> {
+                if (task.getResult() != null) {
+                    User user = task.getResult().toObject(User.class);
+                    if (user != null && user.getPlaceDate() != null) {
+                        if (user.getPlaceDate().equals(App.getTodayDate())) {
+                            callback.onCompleted(user.getPlaceId());
+                        }
+                    } else {
+                        callback.onCompleted(null);
+                    }
+                } else {
+                    callback.onCompleted(null);
+                }
+            });
+        } else {
+            callback.onCompleted(null);
+        }
     }
 }

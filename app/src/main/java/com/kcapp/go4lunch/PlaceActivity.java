@@ -109,7 +109,7 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback, 
     private void initView() {
         Intent intent = getIntent();
         mPlaceId = intent.getStringExtra(Constants.PLACE_ID);
-        mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        mFirebaseUser = App.getFirebaseUser();
 
         mPlaceImage = findViewById(R.id.place_activity_place_image);
         mPlaceName = findViewById(R.id.place_activity_place_name);

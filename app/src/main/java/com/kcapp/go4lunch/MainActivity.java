@@ -33,10 +33,13 @@ import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.kcapp.go4lunch.api.services.App;
 import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.fragment.ListFragment;
 import com.kcapp.go4lunch.fragment.MapFragment;
 import com.kcapp.go4lunch.fragment.WorkmatesFragment;
+
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private DrawerLayout mDrawerLayout;
@@ -50,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_main);
 
         // Get connected user
-        mFirebaseUser = FirebaseAuth.getInstance().getCurrentUser();
+        mFirebaseUser = App.getFirebaseUser();
 
         if (mFirebaseUser == null) {
             startAuthActivity();
@@ -63,6 +66,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // Check permission
             checkLocationPermission();
         }
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
+        super.onCreate(savedInstanceState, persistentState);
+
+        // Check permission
+        checkLocationPermission();
     }
 
     @Override
@@ -82,17 +93,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         switch (item.getItemId()) {
             case R.id.nav_lunch:
                 System.out.println("MainActivity :: onOptionsItemSelected :: nav_lunch");
-                mDrawerLayout.closeDrawer(GravityCompat.START);
-                return true;
+
+                App.getUserPlace(placeId -> {
+                    System.out.println("PLACEID :: "+placeId);
+                    if (placeId != null) {
+                        mDrawerLayout.closeDrawer(GravityCompat.START);
+
+                        Intent intent = new Intent(getApplicationContext(), PlaceActivity.class);
+                        intent.putExtra(Constants.PLACE_ID, placeId);
+                        startActivityForResult(intent, Constants.CODE_REQUEST_MAIN_ACTIVITY);
+                    } else {
+                        Toast.makeText(getApplicationContext(), R.string.place_not_selected, Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                return false;
             case R.id.nav_settings:
                 System.out.println("MainActivity :: onOptionsItemSelected :: nav_settings");
                 mDrawerLayout.closeDrawer(GravityCompat.START);
-                return true;
+                return false;
             case R.id.nav_logout:
                 System.out.println("MainActivity :: onOptionsItemSelected :: nav_logout");
                 mDrawerLayout.closeDrawer(GravityCompat.START);
                 signOutFromFirebase();
-                return true;
+                return false;
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -110,27 +134,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String s) {
-                if (mSelectedFragment == null) {
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, MapFragment.newInstance(s)).commit();
-                } else {
-                    if (mSelectedFragment.getClass().equals(MapFragment.class)) {
-                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, MapFragment.newInstance(s)).commit();
-                    } else if (mSelectedFragment.getClass().equals(ListFragment.class)) {
-                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, ListFragment.newInstance(s)).commit();
-                    }
-                }
-
+                reloadFragment(s);
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String s) {
                 if (s.length() == 0) {
-                    if (mSelectedFragment == null) {
-                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new MapFragment()).commit();
-                    } else {
-                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, mSelectedFragment).commit();
-                    }
+                    reloadFragment(null);
                 }
 
                 return false;
@@ -138,6 +149,31 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         });
 
         return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == Constants.CODE_REQUEST_MAIN_ACTIVITY) {
+            reloadFragment(null);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch (requestCode) {
+            case Constants.LOCATION_CODE:
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    // Set default fragment when the app is open
+                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new MapFragment()).commit();
+                }  else {
+                    Toast.makeText(getApplicationContext(), getString(R.string.permission_denied), Toast.LENGTH_LONG).show();
+                }
+                break;
+            default:
+                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        }
     }
 
     /**
@@ -245,28 +281,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        switch (requestCode) {
-            case Constants.LOCATION_CODE:
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    // Set default fragment when the app is open
-                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new MapFragment()).commit();
-                }  else {
-                    Toast.makeText(getApplicationContext(), getString(R.string.permission_denied), Toast.LENGTH_LONG).show();
-                }
-                break;
-            default:
-                super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    /**
+     * Reload the fragment selected
+     * @param searchKeyword result of the searchview
+     */
+    private void reloadFragment(@Nullable String searchKeyword) {
+        Fragment fragment = null;
+
+        if (searchKeyword != null) {
+            if (mSelectedFragment == null || mSelectedFragment.getClass().equals(MapFragment.class)) {
+                fragment = MapFragment.newInstance(searchKeyword);
+            } else if (mSelectedFragment.getClass().equals(ListFragment.class)) {
+                fragment = ListFragment.newInstance(searchKeyword);
+            }
+        } else {
+            if (mSelectedFragment == null || mSelectedFragment.getClass().equals(MapFragment.class)) {
+                fragment = new MapFragment();
+            } else if (mSelectedFragment.getClass().equals(ListFragment.class)) {
+                fragment = new ListFragment();
+            }
         }
-    }
 
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState, @Nullable PersistableBundle persistentState) {
-        super.onCreate(savedInstanceState, persistentState);
-
-        // Check permission
-        checkLocationPermission();
+        if (fragment != null) {
+            getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment).commit();
+        }
     }
 }
