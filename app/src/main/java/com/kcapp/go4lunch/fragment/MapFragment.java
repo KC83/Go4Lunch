@@ -53,6 +53,17 @@ public class MapFragment extends Fragment {
     Double mLat, mLng;
     SupportMapFragment mMapFragment;
     FusedLocationProviderClient mClient;
+    String mKeyword;
+
+    public static MapFragment newInstance(String keyword) {
+        MapFragment mapFragment = new MapFragment();
+        Bundle args = new Bundle();
+
+        args.putString(Constants.EXTRA_KEYWORD_MAP_FRAGMENT, keyword);
+        mapFragment.setArguments(args);
+
+        return mapFragment;
+    }
 
     private OnMapReadyCallback mCallback = new OnMapReadyCallback() {
 
@@ -99,6 +110,10 @@ public class MapFragment extends Fragment {
         if (this.getContext() != null) {
             // Initialize fused location
             mClient = LocationServices.getFusedLocationProviderClient(this.getContext());
+            // Get keyword if it's a search
+            if (getArguments() != null) {
+                mKeyword = getArguments().getString(Constants.EXTRA_KEYWORD_MAP_FRAGMENT);
+            }
             // Get the current location
             getCurrentLocation();
             // Get places
@@ -182,7 +197,7 @@ public class MapFragment extends Fragment {
         ApiGooglePlaces apiGooglePlaces = ApiGooglePlaces.retrofit.create(ApiGooglePlaces.class);
 
         PlacesRepository placesRepository = new PlacesRepositoryImpl(internetManager, apiGooglePlaces);
-        placesRepository.getPlaces(location, new PlacesCallback() {
+        placesRepository.getPlaces(location, mKeyword, new PlacesCallback() {
             @Override
             public void onPlacesAvailable(GooglePlacesResponse places) {
                 for (Result result : places.getResults()) {

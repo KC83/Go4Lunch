@@ -22,6 +22,10 @@ public interface ApiGooglePlaces {
     @GET(Constants.NEARBY_SEARCH_URL)
     Call<GooglePlacesResponse> getPlaces(@Query("location") String location, @Query("radius") String radius, @Query("type") String placeType, @Query("key") String apiKey);
 
+    // With a keyword for search
+    @GET(Constants.NEARBY_SEARCH_URL)
+    Call<GooglePlacesResponse> getPlaces(@Query("location") String location, @Query("radius") String radius, @Query("type") String placeType, @Query("keyword") String keyword, @Query("key") String apiKey);
+
     @GET(Constants.DETAIL_SEARCH_URL)
     Call<GooglePlaceDetailResponse> getPlaceDetail(@Query("place_id") String placeId, @Query("key") String apiKey);
 

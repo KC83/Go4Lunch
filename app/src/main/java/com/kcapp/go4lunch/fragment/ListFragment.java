@@ -45,10 +45,21 @@ public class ListFragment extends Fragment implements ListPlacesAdapter.ListPlac
     ListPlacesAdapter mListPlacesAdapter;
     String mLocation;
     double mLat, mLng;
+    String mKeyword;
 
     ApiGooglePlaces mApiGooglePlaces;
     InternetManager mInternetManager;
     PlacesRepository mPlacesRepository;
+
+    public static ListFragment newInstance(String keyword) {
+        ListFragment listFragment = new ListFragment();
+        Bundle args = new Bundle();
+
+        args.putString(Constants.EXTRA_KEYWORD_LIST_FRAGMENT, keyword);
+        listFragment.setArguments(args);
+
+        return listFragment;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -92,6 +103,11 @@ public class ListFragment extends Fragment implements ListPlacesAdapter.ListPlac
             // Create retrofit
             mApiGooglePlaces = ApiGooglePlaces.retrofit.create(ApiGooglePlaces.class);
 
+            // Get keyword if it's a search
+            if (getArguments() != null) {
+                mKeyword = getArguments().getString(Constants.EXTRA_KEYWORD_LIST_FRAGMENT);
+            }
+
             // Get results and set them into the list
             mListPlaces = view.findViewById(R.id.list_places);
             setResults();
@@ -113,7 +129,7 @@ public class ListFragment extends Fragment implements ListPlacesAdapter.ListPlac
      */
     private void setResults() {
         mPlacesRepository = new PlacesRepositoryImpl(mInternetManager, mApiGooglePlaces);
-        mPlacesRepository.getPlaces(mLocation, new PlacesCallback() {
+        mPlacesRepository.getPlaces(mLocation, mKeyword, new PlacesCallback() {
             @Override
             public void onPlacesAvailable(GooglePlacesResponse places) {
                 mResults = places.getResults();

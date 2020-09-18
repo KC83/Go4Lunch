@@ -1,6 +1,6 @@
 package com.kcapp.go4lunch.api.places;
 
-import android.content.Context;
+import androidx.annotation.Nullable;
 
 import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.api.services.InternetManager;
@@ -26,12 +26,18 @@ public class PlacesRepositoryImpl implements PlacesRepository {
      * @param callback callback
      */
     @Override
-    public void getPlaces(String location, PlacesCallback callback) {
+    public void getPlaces(String location, @Nullable String keyword, PlacesCallback callback) {
         if (!mInternetManager.isConnected()) {
             callback.onError(new Exception());
         }
 
-        Call<GooglePlacesResponse> call = mApiGooglePlaces.getPlaces(location, Constants.NEARBY_PROXIMITY_RADIUS, Constants.NEARBY_TYPE, Constants.GOOGLE_BROWSER_KEY);
+        Call<GooglePlacesResponse> call;
+        if(keyword != null) {
+            call = mApiGooglePlaces.getPlaces(location, Constants.NEARBY_PROXIMITY_RADIUS, Constants.NEARBY_TYPE, keyword, Constants.GOOGLE_BROWSER_KEY);
+        } else {
+            call = mApiGooglePlaces.getPlaces(location, Constants.NEARBY_PROXIMITY_RADIUS, Constants.NEARBY_TYPE, Constants.GOOGLE_BROWSER_KEY);
+        }
+
         call.enqueue(new Callback<GooglePlacesResponse>() {
             @Override
             public void onResponse(Call<GooglePlacesResponse> call, Response<GooglePlacesResponse> response) {

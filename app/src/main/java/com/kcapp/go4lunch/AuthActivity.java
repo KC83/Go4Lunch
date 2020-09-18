@@ -17,6 +17,7 @@ import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.api.helper.UserHelper;
 
 import java.util.Collections;
+import java.util.List;
 
 public class AuthActivity extends AppCompatActivity {
 
@@ -43,22 +44,26 @@ public class AuthActivity extends AppCompatActivity {
     }
     private void authWithFacebook() {
         Log.d("TAG", "AuthActivity::authWithFacebook");
+
+        List<AuthUI.IdpConfig> providers = Collections.singletonList(new AuthUI.IdpConfig.FacebookBuilder().build());
+
         startActivityForResult(
                 AuthUI.getInstance()
                         .createSignInIntentBuilder()
-                        .setAvailableProviders(
-                                Collections.singletonList(new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build()))
+                        .setAvailableProviders(providers)
                         .setIsSmartLockEnabled(false, true)
                         .build(),
                 Constants.RC_SIGN_IN);
     }
     private void authWithGoogle() {
         Log.d("TAG", "AuthActivity::authWithGoogle");
+
+        List<AuthUI.IdpConfig> providers = Collections.singletonList(new AuthUI.IdpConfig.GoogleBuilder().build());
+
         startActivityForResult(
                 AuthUI.getInstance()
                         .createSignInIntentBuilder()
-                        .setAvailableProviders(
-                                Collections.singletonList(new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build()))
+                        .setAvailableProviders(providers)
                         .setIsSmartLockEnabled(false, true)
                         .build(),
                 Constants.RC_SIGN_IN);
@@ -79,9 +84,9 @@ public class AuthActivity extends AppCompatActivity {
             } else { // ERRORS
                 if (response == null) {
                     Toast.makeText(getApplicationContext(), getString(R.string.error_authentication_canceled), Toast.LENGTH_SHORT).show();
-                } else if (response.getErrorCode() == ErrorCodes.NO_NETWORK) {
+                } else if (response.getError().getErrorCode() == ErrorCodes.NO_NETWORK) {
                     Toast.makeText(getApplicationContext(), getString(R.string.error_no_internet), Toast.LENGTH_SHORT).show();
-                } else if (response.getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
+                } else if (response.getError().getErrorCode() == ErrorCodes.UNKNOWN_ERROR) {
                     Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_SHORT).show();
                 }
             }

@@ -30,7 +30,9 @@ public final class Constants {
     /**
      * MAIN ACTIVITY
      */
-    public static int CODE_REQUEST_AUTOCOMPLETE = 5000;
+    public static final int CODE_REQUEST_AUTOCOMPLETE = 5000;
+    public static final String EXTRA_KEYWORD_MAP_FRAGMENT = "EXTRA_KEYWORD_MAP_FRAGMENT";
+    public static final String EXTRA_KEYWORD_LIST_FRAGMENT = "EXTRA_KEYWORD_LIST_FRAGMENT";
 
     /**
      * PLACE ACTIVITY

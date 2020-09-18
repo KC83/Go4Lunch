@@ -12,8 +12,6 @@ import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
 
 import android.Manifest;
-import android.app.SearchManager;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -43,7 +41,8 @@ import com.kcapp.go4lunch.fragment.WorkmatesFragment;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private DrawerLayout mDrawerLayout;
     private FirebaseUser mFirebaseUser;
-
+    private Fragment mSelectedFragment;
+    private SearchView mSearchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +62,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             // Check permission
             checkLocationPermission();
-
-            //Places.initialize(getApplicationContext(), getString(R.string.google_api_key));
         }
     }
 
@@ -72,6 +69,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onBackPressed() {
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             mDrawerLayout.closeDrawer(GravityCompat.START);
+        } else if (!mSearchView.isIconified()) {
+            mSearchView.setIconified(true);
+            mSearchView.onActionViewCollapsed();
         } else {
             super.onBackPressed();
         }
@@ -104,21 +104,34 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         inflater.inflate(R.menu.toolbar_menu, menu);
 
         MenuItem searchItem = menu.findItem(R.id.toolbar_search);
-        SearchView searchView = (SearchView) searchItem.getActionView();
-        searchView.setQueryHint(getString(R.string.search));
+        mSearchView = (SearchView) searchItem.getActionView();
+        mSearchView.setQueryHint(getString(R.string.search));
 
-        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String s) {
+                if (mSelectedFragment == null) {
+                    getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, MapFragment.newInstance(s)).commit();
+                } else {
+                    if (mSelectedFragment.getClass().equals(MapFragment.class)) {
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, MapFragment.newInstance(s)).commit();
+                    } else if (mSelectedFragment.getClass().equals(ListFragment.class)) {
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, ListFragment.newInstance(s)).commit();
+                    }
+                }
+
                 return false;
             }
 
             @Override
             public boolean onQueryTextChange(String s) {
-               /* List<Place.Field> fieldList = Arrays.asList(Place.Field.ADDRESS, Place.Field.LAT_LNG, Place.Field.NAME);
-                Intent intent = new Autocomplete.IntentBuilder(AutocompleteActivityMode.OVERLAY, fieldList).build(MainActivity.this);
-                startActivityForResult(intent, Constants.CODE_REQUEST_AUTOCOMPLETE);
-*/
+                if (s.length() == 0) {
+                    if (mSelectedFragment == null) {
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, new MapFragment()).commit();
+                    } else {
+                        getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, mSelectedFragment).commit();
+                    }
+                }
 
                 return false;
             }
@@ -127,31 +140,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        /*if (requestCode == Constants.CODE_REQUEST_AUTOCOMPLETE) {
-            if (resultCode == RESULT_OK) {
-                Place place = Autocomplete.getPlaceFromIntent(data);
-                System.out.println("Place: " + place.getName() + ", " + place.getId());
-            } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
-                // TODO: Handle the error.
-                Status status = Autocomplete.getStatusFromIntent(data);
-                System.out.println(status.getStatusMessage());
-            } else if (resultCode == RESULT_CANCELED) {
-                // The user canceled the operation.
-            }
-            return;
-        }*/
-
-        super.onActivityResult(requestCode, resultCode, data);
-    }
-
     /**
      * Open the authentication page
      */
     private void startAuthActivity() {
         Intent intent = new Intent(this, AuthActivity.class);
         startActivity(intent);
+        finish();
     }
 
     /**
@@ -193,22 +188,26 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         BottomNavigationView bottomNavigationView = findViewById(R.id.bottom_navigation);
         bottomNavigationView.bringToFront();
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
-            Fragment selectedFragment = null;
+            mSelectedFragment = null;
+
+            if (mSearchView != null) {
+                mSearchView.setQuery(null,true);
+            }
 
             switch (item.getItemId()) {
                 case R.id.navigation_map_view:
-                    selectedFragment = new MapFragment();
+                    mSelectedFragment = new MapFragment();
                     break;
                 case R.id.navigation_list_view:
-                    selectedFragment = new ListFragment();
+                    mSelectedFragment = new ListFragment();
                     break;
                 case R.id.navigation_workmates:
-                    selectedFragment = new WorkmatesFragment();
+                    mSelectedFragment = new WorkmatesFragment();
                     break;
             }
 
-            if (selectedFragment != null) {
-                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, selectedFragment).commit();
+            if (mSelectedFragment != null) {
+                getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, mSelectedFragment).commit();
                 return true;
             }
             return false;
