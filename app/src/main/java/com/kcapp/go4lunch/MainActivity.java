@@ -95,10 +95,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 System.out.println("MainActivity :: onOptionsItemSelected :: nav_lunch");
 
                 App.getUserPlace(placeId -> {
-                    System.out.println("PLACEID :: "+placeId);
+                    mDrawerLayout.closeDrawer(GravityCompat.START);
                     if (placeId != null) {
-                        mDrawerLayout.closeDrawer(GravityCompat.START);
-
                         Intent intent = new Intent(getApplicationContext(), PlaceActivity.class);
                         intent.putExtra(Constants.PLACE_ID, placeId);
                         startActivityForResult(intent, Constants.CODE_REQUEST_MAIN_ACTIVITY);
