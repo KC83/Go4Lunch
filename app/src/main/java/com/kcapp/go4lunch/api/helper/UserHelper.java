@@ -15,6 +15,10 @@ import com.kcapp.go4lunch.model.User;
 
 public class UserHelper {
 
+    public static CollectionReference getUsersCollection(FirebaseFirestore firestore) {
+        return firestore.collection(Constants.USER_COLLECTION_NAME);
+    }
+
     // COLLECTION REFERENCE
     private static CollectionReference getUsersCollection() {
         return FirebaseFirestore.getInstance().collection(Constants.USER_COLLECTION_NAME);
