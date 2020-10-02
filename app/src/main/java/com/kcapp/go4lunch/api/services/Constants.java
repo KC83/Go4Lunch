@@ -1,7 +1,5 @@
 package com.kcapp.go4lunch.api.services;
 
-import com.kcapp.go4lunch.R;
-
 public final class Constants {
     /**
      * AUTH
@@ -31,6 +29,7 @@ public final class Constants {
      * MAIN ACTIVITY
      */
     public static final int CODE_REQUEST_MAIN_ACTIVITY = 5000;
+    public static final int AUTOCOMPLETE_MAIN_ACTIVITY = 6000;
     public static final String EXTRA_KEYWORD_MAP_FRAGMENT = "EXTRA_KEYWORD_MAP_FRAGMENT";
     public static final String EXTRA_KEYWORD_LIST_FRAGMENT = "EXTRA_KEYWORD_LIST_FRAGMENT";
 
