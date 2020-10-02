@@ -4,7 +4,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SearchView;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
@@ -14,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.text.TextUtils;
@@ -29,9 +29,20 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.tasks.Task;
+import com.google.android.libraries.places.api.Places;
+import com.google.android.libraries.places.api.model.Place;
+import com.google.android.libraries.places.api.model.RectangularBounds;
+import com.google.android.libraries.places.api.model.TypeFilter;
+import com.google.android.libraries.places.widget.Autocomplete;
+import com.google.android.libraries.places.widget.AutocompleteActivity;
+import com.google.android.libraries.places.widget.model.AutocompleteActivityMode;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.kcapp.go4lunch.api.services.App;
 import com.kcapp.go4lunch.api.services.Constants;
@@ -39,13 +50,13 @@ import com.kcapp.go4lunch.fragment.ListFragment;
 import com.kcapp.go4lunch.fragment.MapFragment;
 import com.kcapp.go4lunch.fragment.WorkmatesFragment;
 
-import java.util.Map;
+import java.util.Arrays;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private DrawerLayout mDrawerLayout;
     private FirebaseUser mFirebaseUser;
     private Fragment mSelectedFragment;
-    private SearchView mSearchView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +76,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             // Check permission
             checkLocationPermission();
+
+            // Initialise place autocomplete
+            if (!Places.isInitialized()) {
+                Places.initialize(getApplicationContext(), getString(R.string.google_api_key));
+            }
         }
     }
 
@@ -80,9 +96,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public void onBackPressed() {
         if (mDrawerLayout.isDrawerOpen(GravityCompat.START)) {
             mDrawerLayout.closeDrawer(GravityCompat.START);
-        } else if (!mSearchView.isIconified()) {
-            mSearchView.setIconified(true);
-            mSearchView.onActionViewCollapsed();
         } else {
             super.onBackPressed();
         }
@@ -124,36 +137,72 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onCreateOptionsMenu(Menu menu) {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.toolbar_menu, menu);
+        return true;
+    }
 
-        MenuItem searchItem = menu.findItem(R.id.toolbar_search);
-        mSearchView = (SearchView) searchItem.getActionView();
-        mSearchView.setQueryHint(getString(R.string.search));
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        // Initialize fused location
+        FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(this.getApplicationContext());
 
-        mSearchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
-            @Override
-            public boolean onQueryTextSubmit(String s) {
-                reloadFragment(s);
-                return false;
-            }
+        // Set the fields to specify which types of place data to return.
+        List<Place.Field> fields = Arrays.asList(Place.Field.ID, Place.Field.NAME, Place.Field.ADDRESS, Place.Field.LAT_LNG);
 
-            @Override
-            public boolean onQueryTextChange(String s) {
-                if (s.length() == 0) {
-                    reloadFragment(null);
-                }
+        // Check permission
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // If the permission is not accepted, we do not filter the search with the location
 
-                return false;
-            }
+            // Start the autocomplete intent.
+            Intent intent = new Autocomplete.IntentBuilder(
+                    AutocompleteActivityMode.OVERLAY, fields)
+                    .setTypeFilter(TypeFilter.ESTABLISHMENT)
+                    .build(MainActivity.this);
+            startActivityForResult(intent, Constants.AUTOCOMPLETE_MAIN_ACTIVITY);
+
+            return false;
+        }
+
+        Task<Location> task = client.getLastLocation();
+        task.addOnSuccessListener(location -> {
+            // Create a RectangularBounds object.
+            RectangularBounds bounds = RectangularBounds.newInstance(
+                    new LatLng(location.getLatitude(), location.getLongitude()),
+                    new LatLng(location.getLatitude(), location.getLongitude()));
+
+            // Start the autocomplete intent.
+            Intent intent = new Autocomplete.IntentBuilder(
+                    AutocompleteActivityMode.OVERLAY, fields)
+                    .setLocationBias(bounds)
+                    .setTypeFilter(TypeFilter.ESTABLISHMENT)
+                    .build(MainActivity.this);
+            startActivityForResult(intent, Constants.AUTOCOMPLETE_MAIN_ACTIVITY);
         });
 
-        return true;
+        return super.onOptionsItemSelected(item);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == Constants.CODE_REQUEST_MAIN_ACTIVITY) {
-            reloadFragment(null);
+
+        switch (requestCode) {
+            case Constants.CODE_REQUEST_MAIN_ACTIVITY:
+                reloadFragment();
+                break;
+            case Constants.AUTOCOMPLETE_MAIN_ACTIVITY:
+                if (resultCode == RESULT_OK) {
+                    if (data != null) {
+                        Place place = Autocomplete.getPlaceFromIntent(data);
+                        Intent intent = new Intent(getApplicationContext(), PlaceActivity.class);
+                        intent.putExtra(Constants.PLACE_ID, place.getId());
+                        startActivityForResult(intent, Constants.CODE_REQUEST_MAIN_ACTIVITY);
+                    }
+                } else if (resultCode == AutocompleteActivity.RESULT_ERROR) {
+                    Status status = Autocomplete.getStatusFromIntent(data);
+                } else if (resultCode == RESULT_CANCELED) {
+                    // The user canceled the operation.
+                }
+                break;
         }
     }
 
@@ -224,10 +273,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> {
             mSelectedFragment = null;
 
-            if (mSearchView != null) {
-                mSearchView.setQuery(null,true);
-            }
-
             switch (item.getItemId()) {
                 case R.id.navigation_map_view:
                     mSelectedFragment = new MapFragment();
@@ -281,23 +326,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     /**
      * Reload the fragment selected
-     * @param searchKeyword result of the searchview
      */
-    private void reloadFragment(@Nullable String searchKeyword) {
+    private void reloadFragment() {
         Fragment fragment = null;
 
-        if (searchKeyword != null) {
-            if (mSelectedFragment == null || mSelectedFragment.getClass().equals(MapFragment.class)) {
-                fragment = MapFragment.newInstance(searchKeyword);
-            } else if (mSelectedFragment.getClass().equals(ListFragment.class)) {
-                fragment = ListFragment.newInstance(searchKeyword);
-            }
-        } else {
-            if (mSelectedFragment == null || mSelectedFragment.getClass().equals(MapFragment.class)) {
-                fragment = new MapFragment();
-            } else if (mSelectedFragment.getClass().equals(ListFragment.class)) {
-                fragment = new ListFragment();
-            }
+        if (mSelectedFragment == null || mSelectedFragment.getClass().equals(MapFragment.class)) {
+            fragment = new MapFragment();
+        } else if (mSelectedFragment.getClass().equals(ListFragment.class)) {
+            fragment = new ListFragment();
         }
 
         if (fragment != null) {
