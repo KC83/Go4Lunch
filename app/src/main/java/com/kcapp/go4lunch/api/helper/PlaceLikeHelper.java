@@ -15,6 +15,11 @@ import java.util.Map;
 import static android.content.ContentValues.TAG;
 
 public class PlaceLikeHelper {
+    // COLLECTION REFERENCE WITH A FIREBASE FIRESTORE
+    public static CollectionReference getPlacesLikesCollection(FirebaseFirestore firestore) {
+        return firestore.collection(Constants.PLACE_LIKE_COLLECTION_NAME);
+    }
+
     // COLLECTION REFERENCE
     private static CollectionReference getPlacesLikesCollection() {
         return FirebaseFirestore.getInstance().collection(Constants.PLACE_LIKE_COLLECTION_NAME);
