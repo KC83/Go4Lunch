@@ -19,26 +19,11 @@ public class PlaceLikeHelper {
     public static CollectionReference getPlacesLikesCollection(FirebaseFirestore firestore) {
         return firestore.collection(Constants.PLACE_LIKE_COLLECTION_NAME);
     }
-
     // COLLECTION REFERENCE
     private static CollectionReference getPlacesLikesCollection() {
         return FirebaseFirestore.getInstance().collection(Constants.PLACE_LIKE_COLLECTION_NAME);
     }
-    // CREATE
-    public static void createPlaceLike(String userUid, String placeId) {
-        Map<String, String> data = new HashMap<>();
-        data.put("userUid", userUid);
-        data.put("placeId", placeId);
 
-        PlaceLikeHelper.getPlacesLikesCollection()
-                .add(data)
-                .addOnSuccessListener(documentReference -> {
-                    Log.d(TAG, R.string.success_add_place_like + " : " + documentReference.getId());
-                })
-                .addOnFailureListener(e -> {
-                    Log.w(TAG, R.string.error_add_place_like + "", e);
-                });
-    }
     // GET
     public static Task<QuerySnapshot> getPlaceLike(String userUid, String placeId) {
         return PlaceLikeHelper.getPlacesLikesCollection()
@@ -46,9 +31,10 @@ public class PlaceLikeHelper {
                 .whereEqualTo("placeId", placeId)
                 .get();
     }
-
-    // DELETE
-    public static void deletePlaceLike(String uid) {
-        PlaceLikeHelper.getPlacesLikesCollection().document(uid).delete();
+    public static Task<QuerySnapshot> getPlaceLike(FirebaseFirestore firestore, String userUid, String placeId) {
+        return PlaceLikeHelper.getPlacesLikesCollection(firestore)
+                .whereEqualTo("userUid", userUid)
+                .whereEqualTo("placeId", placeId)
+                .get();
     }
 }

@@ -13,8 +13,12 @@ import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.kcapp.go4lunch.api.services.App;
 import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.api.helper.UserHelper;
+import com.kcapp.go4lunch.di.manager.FirebaseUserManager;
+import com.kcapp.go4lunch.di.manager.UserManager;
+import com.kcapp.go4lunch.model.User;
 
 import java.util.Collections;
 import java.util.List;
@@ -76,11 +80,6 @@ public class AuthActivity extends AppCompatActivity {
         if (requestCode == Constants.RC_SIGN_IN) {
             if (resultCode == RESULT_OK) { // SUCCESS
                 createUserInFirebase();
-                Toast.makeText(getApplicationContext(), getString(R.string.connection_succeed), Toast.LENGTH_SHORT).show();
-
-
-                Intent intent = new Intent(this, MainActivity.class);
-                startActivity(intent);
             } else { // ERRORS
                 if (response == null) {
                     Toast.makeText(getApplicationContext(), getString(R.string.error_authentication_canceled), Toast.LENGTH_SHORT).show();
@@ -102,7 +101,21 @@ public class AuthActivity extends AppCompatActivity {
             String email = currentUser.getEmail();
             String urlPicture = (currentUser.getPhotoUrl() != null) ? currentUser.getPhotoUrl().toString() : null;
 
-            UserHelper.createUser(uid, username, email, urlPicture).addOnFailureListener(e -> Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_LONG).show());
+            UserManager firebaseUserManager = new FirebaseUserManager(App.getFirestore());
+            firebaseUserManager.createUser(uid, username, email, urlPicture, new UserManager.OnUserCreationCallback() {
+                @Override
+                public void onSuccess(User user) {
+                    Toast.makeText(getApplicationContext(), getString(R.string.connection_succeed), Toast.LENGTH_SHORT).show();
+
+                    Intent intent = new Intent(getApplicationContext(), MainActivity.class);
+                    startActivity(intent);
+                }
+
+                @Override
+                public void onError(Throwable throwable) {
+                    Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
         }
     }
 }

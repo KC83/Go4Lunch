@@ -19,12 +19,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
-import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.kcapp.go4lunch.adapter.ListWorkmatesAdapter;
 import com.kcapp.go4lunch.api.helper.PlaceLikeHelper;
 import com.kcapp.go4lunch.api.helper.UserHelper;
@@ -35,6 +31,10 @@ import com.kcapp.go4lunch.api.services.App;
 import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.api.services.InternetManager;
 import com.kcapp.go4lunch.api.services.InternetManagerImpl;
+import com.kcapp.go4lunch.di.manager.FirebasePlaceLikeManager;
+import com.kcapp.go4lunch.di.manager.FirebaseUserManager;
+import com.kcapp.go4lunch.di.manager.PlaceLikeManager;
+import com.kcapp.go4lunch.di.manager.UserManager;
 import com.kcapp.go4lunch.model.PlaceLike;
 import com.kcapp.go4lunch.model.User;
 import com.kcapp.go4lunch.model.places.GooglePlaceDetailResponse;
@@ -230,47 +230,82 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback, 
      * @param isClicked if true, the "place like" is created or deleted
      */
     private void onLikeButtonClicked(boolean isClicked) {
-        Task<QuerySnapshot> query = PlaceLikeHelper.getPlaceLike(mFirebaseUser.getUid(), mPlaceId);
-        query.addOnCompleteListener(task -> {
-            if (task.getResult().isEmpty()) {
-                if (isClicked) {
-                    // Create action
-                    PlaceLikeHelper.createPlaceLike(mFirebaseUser.getUid(), mPlaceId);
+        PlaceLikeManager firebasePlaceLikeManager = new FirebasePlaceLikeManager(App.getFirestore());
+        firebasePlaceLikeManager.getPlaceLike(mFirebaseUser.getUid(), mPlaceId, new PlaceLikeManager.OnGetPlaceLikeCallback() {
+            @Override
+            public void onSuccess(PlaceLike placeLike) {
+                if (placeLike.getUid() != null) {
+                    if (isClicked) {
+                        // Delete action
+                        firebasePlaceLikeManager.deletePlaceLike(placeLike.getUid(), new PlaceLikeManager.OnDeletePlaceLikeCallback() {
+                            @Override
+                            public void onSuccess(boolean isDeleted) {
+                                // Set to false
+                                mIsPlaceLiked = false;
 
-                    // Set to true
-                    mIsPlaceLiked = true;
+                                // Update view
+                                changePlaceLikeButton();
+                            }
+
+                            @Override
+                            public void onError(Throwable throwable) {
+                                Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } else {
+                        // Set to true
+                        mIsPlaceLiked = true;
+                    }
                 } else {
-                    mIsPlaceLiked = false;
-                }
-            } else {
-                if (isClicked) {
-                    PlaceLike placeLike = task.getResult().getDocuments().get(0).toObject(PlaceLike.class);
-                    placeLike.setUid(task.getResult().getDocuments().get(0).getId());
+                    if (isClicked) {
+                        // Create action
+                        firebasePlaceLikeManager.createPlaceLike(mFirebaseUser.getUid(), mPlaceId, new PlaceLikeManager.OnCreatePlaceLikeCallback() {
+                            @Override
+                            public void onSuccess(PlaceLike placeLike) {
+                                // Set to true
+                                mIsPlaceLiked = true;
 
-                    // Delete action
-                    PlaceLikeHelper.deletePlaceLike(placeLike.getUid());
+                                // Update view
+                                changePlaceLikeButton();
+                            }
 
-                    // Set to false
-                    mIsPlaceLiked = false;
-                } else {
-                    // Set to true
-                    mIsPlaceLiked = true;
+                            @Override
+                            public void onError(Throwable throwable) {
+                                Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } else {
+                        mIsPlaceLiked = false;
+                    }
                 }
+
+                // Update view
+                changePlaceLikeButton();
             }
 
-            // Update view
-            if (mIsPlaceLiked) {
-                // Show favorite icon
-                mPlaceName.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_star_yellow, 0);
-                // Set text of the button
-                mLikeButton.setText(R.string.dislike);
-            } else {
-                // Remove favorite icon
-                mPlaceName.setCompoundDrawablesWithIntrinsicBounds(0,0,0,0);
-                // Set text of the button
-                mLikeButton.setText(R.string.like);
+            @Override
+            public void onError(Throwable throwable) {
+                Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    /**
+     * Change the like button and the favorite star
+     */
+    private void changePlaceLikeButton() {
+        // Update view
+        if (mIsPlaceLiked) {
+            // Show favorite icon
+            mPlaceName.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_star_yellow, 0);
+            // Set text of the button
+            mLikeButton.setText(R.string.dislike);
+        } else {
+            // Remove favorite icon
+            mPlaceName.setCompoundDrawablesWithIntrinsicBounds(0,0,0,0);
+            // Set text of the button
+            mLikeButton.setText(R.string.like);
+        }
     }
 
     /**
@@ -278,40 +313,75 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback, 
      * @param isClicked if true, the "place lunch" is created or deleted
      */
     private void onLunchButtonClicked(boolean isClicked) {
-        Task<DocumentSnapshot> documentSnapshotTask = UserHelper.getUser(mFirebaseUser.getUid());
-        documentSnapshotTask.addOnCompleteListener(task -> {
-            User user = task.getResult().toObject(User.class);
+        UserManager firebaseUserManager = new FirebaseUserManager(App.getFirestore());
+        firebaseUserManager.getUser(mFirebaseUser.getUid(), new UserManager.OnGetUserCallback() {
+            @Override
+            public void onSuccess(User user) {
+                // Current user is going to this place today
+                if (user.getPlaceId() != null && user.getPlaceDate() != null && user.getPlaceId().equals(mPlaceId) && user.getPlaceDate().equals(App.getTodayDate())) {
+                    // If clicked, the current user don't go there anymore
+                    if (isClicked) {
+                        // Update place, remove placeId and placeDate
+                        firebaseUserManager.updatePlace(mFirebaseUser.getUid(), null, null, new UserManager.OnUpdatePlaceCallback() {
+                            @Override
+                            public void onSuccess(User user) {
+                                mIsPlaceLunch = false;
+                                // Update view
+                                changeLunchButton();
+                            }
 
-            // Current user is going to this place today
-            if (user.getPlaceId() != null && user.getPlaceDate() != null && user.getPlaceId().equals(mPlaceId) && user.getPlaceDate().equals(App.getTodayDate())) {
-                mIsPlaceLunch = true;
+                            @Override
+                            public void onError(Throwable throwable) {
+                                Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } else {
+                        mIsPlaceLunch = true;
+                    }
+                } else {
+                    // If clicked, the current user go there
+                    if (isClicked) {
+                        // Update place
+                        firebaseUserManager.updatePlace(mFirebaseUser.getUid(), mPlaceId, App.getTodayDate(), new UserManager.OnUpdatePlaceCallback() {
+                            @Override
+                            public void onSuccess(User user) {
+                                mIsPlaceLunch = true;
+                                // Update view
+                                changeLunchButton();
+                            }
 
-                // If clicked, the current user don't go there anymore
-                if (isClicked) {
-                    mIsPlaceLunch = false;
-                    // Update place, remove placeId and placeDate
-                    UserHelper.updatePlace(mFirebaseUser.getUid(), null, null);
+                            @Override
+                            public void onError(Throwable throwable) {
+                                Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    } else {
+                        mIsPlaceLunch = false;
+                    }
                 }
-            } else {
-                mIsPlaceLunch = false;
 
-                // If clicked, the current user go there
-                if (isClicked) {
-                    mIsPlaceLunch = true;
-                    // Update place
-                    UserHelper.updatePlace(mFirebaseUser.getUid(), mPlaceId, App.getTodayDate());
-                }
+                // Update view
+                changeLunchButton();
             }
 
-            // Update view
-            if (mIsPlaceLunch) {
-                // Change the button with a uncheck icon
-                mLunchButton.setImageResource(R.drawable.ic_check);
-            } else {
-                // Change the button with a uncheck icon
-                mLunchButton.setImageResource(R.drawable.ic_uncheck);
+            @Override
+            public void onError(Throwable throwable) {
+                Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+    }
+
+    /**
+     * Change the lunch button
+     */
+    public void changeLunchButton() {
+        if (mIsPlaceLunch) {
+            // Change the button with a uncheck icon
+            mLunchButton.setImageResource(R.drawable.ic_check);
+        } else {
+            // Change the button with a uncheck icon
+            mLunchButton.setImageResource(R.drawable.ic_uncheck);
+        }
     }
 
     /**
@@ -349,5 +419,7 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback, 
     }
 
     @Override
-    public void onClick(String placeId) {}
+    public void onClick(String placeId) {
+        // No action when we click on a workmates in the placeActivity
+    }
 }

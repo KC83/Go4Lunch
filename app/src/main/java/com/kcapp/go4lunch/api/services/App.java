@@ -3,23 +3,22 @@ package com.kcapp.go4lunch.api.services;
 import android.annotation.SuppressLint;
 import android.content.Context;
 
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.kcapp.go4lunch.api.helper.UserHelper;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.kcapp.go4lunch.api.places.ApiGooglePlaces;
 import com.kcapp.go4lunch.api.places.PlacesCallback;
 import com.kcapp.go4lunch.api.places.PlacesRepositoryImpl;
+import com.kcapp.go4lunch.di.manager.FirebaseUserManager;
+import com.kcapp.go4lunch.di.manager.UserManager;
 import com.kcapp.go4lunch.model.User;
 import com.kcapp.go4lunch.model.places.GooglePlaceDetailResponse;
 import com.kcapp.go4lunch.model.places.GooglePlacesResponse;
-import com.kcapp.go4lunch.model.places.result.Result;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 
 public class App {
     /**
@@ -34,8 +33,20 @@ public class App {
         return dateFormat.format(date);
     }
 
+    /**
+     * Get logged firebaseUser
+     * @return FirebaseUser
+     */
     public static FirebaseUser getFirebaseUser() {
         return FirebaseAuth.getInstance().getCurrentUser();
+    }
+
+    /**
+     * Get firebaseFirestore instance
+     * @return FirebaseFirestore
+     */
+    public static FirebaseFirestore getFirestore() {
+        return FirebaseFirestore.getInstance();
     }
 
     /**
@@ -79,13 +90,15 @@ public class App {
      * Get the number of reservation for a place
      */
     public static void getCountOfReservation(String placeId, GetCountOfReservationCallback callback) {
-        Task<QuerySnapshot> querySnapshotTask = UserHelper.getAllUsersForAPlaceForTask(placeId);
-        querySnapshotTask.addOnCompleteListener(task -> {
-            if (task.getResult() != null) {
-                callback.onComplete(task.getResult().size());
-            } else {
-                callback.onComplete(0);
+        UserManager firebaseUserManager = new FirebaseUserManager(App.getFirestore());
+        firebaseUserManager.getUsersForAPlace(placeId, new UserManager.OnGetUsersForAPlaceCallback() {
+            @Override
+            public void onSuccess(List<User> users) {
+                callback.onComplete(users.size());
             }
+
+            @Override
+            public void onError(Throwable throwable) {}
         });
     }
 
@@ -95,13 +108,16 @@ public class App {
     public interface GetUserPlaceCallback {
         void onCompleted(String placeId);
     }
+    /**
+     * Get the place where the user go
+     */
     public static void getUserPlace(GetUserPlaceCallback callback) {
         FirebaseUser firebaseUser = App.getFirebaseUser();
         if (firebaseUser != null) {
-            Task<DocumentSnapshot> documentSnapshotTask = UserHelper.getUser(firebaseUser.getUid());
-            documentSnapshotTask.addOnCompleteListener(task -> {
-                if (task.getResult() != null) {
-                    User user = task.getResult().toObject(User.class);
+            UserManager firebaseUserManager = new FirebaseUserManager(App.getFirestore());
+            firebaseUserManager.getUser(firebaseUser.getUid(), new UserManager.OnGetUserCallback() {
+                @Override
+                public void onSuccess(User user) {
                     if (user != null && user.getPlaceDate() != null) {
                         if (user.getPlaceDate().equals(App.getTodayDate())) {
                             callback.onCompleted(user.getPlaceId());
@@ -109,8 +125,11 @@ public class App {
                     } else {
                         callback.onCompleted(null);
                     }
-                } else {
-                    callback.onCompleted(null);
+                }
+
+                @Override
+                public void onError(Throwable throwable) {
+
                 }
             });
         } else {

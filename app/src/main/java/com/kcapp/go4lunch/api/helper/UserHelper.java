@@ -1,5 +1,6 @@
 package com.kcapp.go4lunch.api.helper;
 
+import androidx.annotation.Nullable;
 import androidx.lifecycle.LifecycleOwner;
 
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
@@ -18,47 +19,42 @@ public class UserHelper {
     public static CollectionReference getUsersCollection(FirebaseFirestore firestore) {
         return firestore.collection(Constants.USER_COLLECTION_NAME);
     }
-
     // COLLECTION REFERENCE
     private static CollectionReference getUsersCollection() {
         return FirebaseFirestore.getInstance().collection(Constants.USER_COLLECTION_NAME);
     }
-    // CREATE
+
+    // CREATE USER
     public static Task<Void> createUser(String uid, String username, String email, String urlPicture) {
         User userToCreate = new User(uid, username, email, urlPicture);
         return UserHelper.getUsersCollection().document(uid).set(userToCreate);
     }
-    // GET
+    public static Task<Void> createUser(FirebaseFirestore firestore, String uid, String username, String email, String urlPicture) {
+        User userToCreate = new User(uid, username, email, urlPicture);
+        return UserHelper.getUsersCollection(firestore).document(uid).set(userToCreate);
+    }
+    // GET USER
     public static Task<DocumentSnapshot> getUser(String uid) {
         return UserHelper.getUsersCollection().document(uid).get();
     }
+    public static Task<DocumentSnapshot> getUser(FirebaseFirestore firestore, String uid) {
+        return UserHelper.getUsersCollection(firestore).document(uid).get();
+    }
+    // GET ALL USERS
+    public static Task<QuerySnapshot> getUsersForAPlaceForTask(String placeId) {
+        return UserHelper.getUsersCollection().whereEqualTo("placeId", placeId).whereEqualTo("placeDate", App.getTodayDate()).get();
+    }
+    public static Task<QuerySnapshot> getUsersForAPlaceForTask(FirebaseFirestore firestore, String placeId) {
+        return UserHelper.getUsersCollection(firestore).whereEqualTo("placeId", placeId).whereEqualTo("placeDate", App.getTodayDate()).get();
+    }
+
+    // Query for the list of workmates
     public static Query getAllUsers() {
         return UserHelper.getUsersCollection().orderBy("username", Query.Direction.ASCENDING);
     }
+    // Query for the list of workmates in a detail place
     public static Query getAllUsersForAPlace(String placeId) {
         return UserHelper.getUsersCollection().whereEqualTo("placeId", placeId).whereEqualTo("placeDate", App.getTodayDate()).orderBy("username", Query.Direction.ASCENDING);
-    }
-    public static Task<QuerySnapshot> getAllUsersForAPlaceForTask(String placeId) {
-        return UserHelper.getUsersCollection().whereEqualTo("placeId", placeId).whereEqualTo("placeDate", App.getTodayDate()).get();
-    }
-
-    // UPDATE
-    public static void updatePlace(String uid, String placeId, String date) {
-        Task<DocumentSnapshot> documentSnapshotTask = UserHelper.getUser(uid);
-        documentSnapshotTask.addOnCompleteListener(task -> {
-           if (task.getResult().exists()) {
-               User user = task.getResult().toObject(User.class);
-               user.setPlaceId(placeId);
-               user.setPlaceDate(date);
-
-               UserHelper.getUsersCollection().document(uid).set(user);
-           }
-        });
-
-    }
-    // DELETE
-    public static Task<Void> deleteUser(String uid) {
-        return UserHelper.getUsersCollection().document(uid).delete();
     }
 
     // ADAPTER

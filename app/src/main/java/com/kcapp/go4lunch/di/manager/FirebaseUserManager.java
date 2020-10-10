@@ -20,31 +20,51 @@ public class FirebaseUserManager implements UserManager {
 
     @Override
     public void createUser(String uid, String username, String email, String urlPicture, OnUserCreationCallback callback) {
-        User userToCreate = new User(uid, username, email, urlPicture);
-        Task<Void> task = UserHelper.getUsersCollection(mFirestore).document(uid).set(userToCreate);
-        task.addOnCompleteListener(task1 -> {
-           if (task1.isSuccessful()) {
-               callback.onSuccess(userToCreate);
-           } else {
-               callback.onError(new Exception("Error creation of a user"));
-           }
-        }).addOnFailureListener(callback::onError);
+        UserManager firebaseUserManager = new FirebaseUserManager(mFirestore);
+        firebaseUserManager.getUser(uid, new OnGetUserCallback() {
+            @Override
+            public void onSuccess(User user) {
+                // If the user is already into the database, we replace the values
+                // If the user is not into the database, we create a new user
+
+                user.setUid(uid);
+                user.setUsername(username);
+                user.setEmail(email);
+                user.setUrlPicture(urlPicture);
+
+
+                Task<Void> task = UserHelper.getUsersCollection(mFirestore).document(uid).set(user);
+                task.addOnCompleteListener(task1 -> {
+                    if (task1.isSuccessful()) {
+                        callback.onSuccess(user);
+                    } else {
+                        callback.onError(new Exception("Error creation of a user"));
+                    }
+                }).addOnFailureListener(callback::onError);
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                callback.onError(throwable);
+            }
+        });
     }
 
     @Override
     public void getUser(String uid, OnGetUserCallback callback) {
-        Task<DocumentSnapshot> task = UserHelper.getUsersCollection(mFirestore).document(uid).get();
+        Task<DocumentSnapshot> task = UserHelper.getUser(uid);
         task.addOnCompleteListener(task1 -> {
             if (task1.isSuccessful()) {
-                if (task1.getResult() != null) {
-                    User user = task.getResult().toObject(User.class);
+                if (task1.getResult().exists()) {
+                    User user = task1.getResult().toObject(User.class);
                     if (user != null) {
                         callback.onSuccess(user);
                     } else {
                         callback.onError(new Exception("User not find"));
                     }
+                } else {
+                    callback.onSuccess(new User());
                 }
-                callback.onSuccess(new User());
             } else {
                 callback.onError(new Exception("Error get user"));
             }
@@ -53,7 +73,7 @@ public class FirebaseUserManager implements UserManager {
 
     @Override
     public void getUsersForAPlace(String placeId, OnGetUsersForAPlaceCallback callback) {
-        Task<QuerySnapshot> task = UserHelper.getUsersCollection(mFirestore).whereEqualTo("placeId", placeId).whereEqualTo("placeDate", App.getTodayDate()).get();
+        Task<QuerySnapshot> task = UserHelper.getUsersForAPlaceForTask(mFirestore, placeId);
         task.addOnCompleteListener(task1 -> {
             if (task1.isSuccessful()) {
                 List<User> users = Arrays.asList();
@@ -68,14 +88,29 @@ public class FirebaseUserManager implements UserManager {
     }
 
     @Override
-    public void deleteUser(String uid, OnDeleteUserCallback callback) {
-        Task<Void> task = UserHelper.getUsersCollection(mFirestore).document(uid).delete();
+    public void updatePlace(String uid, String placeId, String date, OnUpdatePlaceCallback callback) {
+        Task<DocumentSnapshot> task = UserHelper.getUser(mFirestore, uid);
         task.addOnCompleteListener(task1 -> {
             if (task1.isSuccessful()) {
-                callback.onSuccess(true);
+                if (task1.getResult().exists()) {
+                    User user = task1.getResult().toObject(User.class);
+                    if (user != null) {
+                        user.setPlaceId(placeId);
+                        user.setPlaceDate(date);
+
+                        UserHelper.getUsersCollection(mFirestore).document(uid).set(user);
+
+                        callback.onSuccess(user);
+                    } else {
+                        callback.onError(new Exception("Error : no user"));
+                    }
+                } else {
+                    callback.onError(new Exception("Error : no result"));
+                }
             } else {
-                callback.onError(new Exception("Error delete user"));
+                callback.onError(new Exception("Error : task not successful"));
             }
-        }).addOnFailureListener(callback::onError);
+
+        });
     }
 }

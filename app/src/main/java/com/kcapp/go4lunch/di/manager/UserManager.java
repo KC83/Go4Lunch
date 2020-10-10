@@ -1,5 +1,6 @@
 package com.kcapp.go4lunch.di.manager;
 
+import com.kcapp.go4lunch.model.PlaceLike;
 import com.kcapp.go4lunch.model.User;
 
 import java.util.List;
@@ -26,10 +27,10 @@ public interface UserManager {
         void onError(Throwable throwable);
     }
 
-    // Delete user
-    void deleteUser(String uid, OnDeleteUserCallback callback);
-    interface OnDeleteUserCallback {
-        void onSuccess(boolean success);
+    // Update place for a user
+    void updatePlace(String uid, String placeId, String date, OnUpdatePlaceCallback callback);
+    interface OnUpdatePlaceCallback {
+        void onSuccess(User user);
         void onError(Throwable throwable);
     }
 }
