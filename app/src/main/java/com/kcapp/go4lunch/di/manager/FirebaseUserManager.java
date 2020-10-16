@@ -6,6 +6,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.kcapp.go4lunch.api.helper.UserHelper;
 import com.kcapp.go4lunch.api.services.App;
+import com.kcapp.go4lunch.di.Injection;
 import com.kcapp.go4lunch.model.User;
 
 import java.util.Arrays;
@@ -20,7 +21,7 @@ public class FirebaseUserManager implements UserManager {
 
     @Override
     public void createUser(String uid, String username, String email, String urlPicture, OnUserCreationCallback callback) {
-        UserManager firebaseUserManager = new FirebaseUserManager(mFirestore);
+        UserManager firebaseUserManager = Injection.getUserManager(mFirestore);
         firebaseUserManager.getUser(uid, new OnGetUserCallback() {
             @Override
             public void onSuccess(User user) {

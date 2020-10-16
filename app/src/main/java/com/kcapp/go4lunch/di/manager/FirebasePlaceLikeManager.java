@@ -5,6 +5,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.kcapp.go4lunch.api.helper.PlaceLikeHelper;
 import com.kcapp.go4lunch.api.services.App;
+import com.kcapp.go4lunch.di.Injection;
 import com.kcapp.go4lunch.model.PlaceLike;
 
 import java.util.HashMap;
@@ -26,7 +27,7 @@ public class FirebasePlaceLikeManager implements PlaceLikeManager {
         PlaceLikeHelper.getPlacesLikesCollection(mFirestore)
                 .add(data)
                 .addOnSuccessListener(documentReference -> {
-                    PlaceLikeManager firebasePlaceLikeManager = new FirebasePlaceLikeManager(App.getFirestore());
+                    PlaceLikeManager firebasePlaceLikeManager = Injection.getPlaceLikeManager(mFirestore);
                     firebasePlaceLikeManager.getPlaceLike(userUid, placeId, new OnGetPlaceLikeCallback() {
                         @Override
                         public void onSuccess(PlaceLike placeLike) {

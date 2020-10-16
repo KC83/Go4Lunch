@@ -9,7 +9,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.kcapp.go4lunch.api.places.ApiGooglePlaces;
 import com.kcapp.go4lunch.api.places.PlacesCallback;
 import com.kcapp.go4lunch.api.places.PlacesRepositoryImpl;
-import com.kcapp.go4lunch.di.manager.FirebaseUserManager;
+import com.kcapp.go4lunch.di.Injection;
 import com.kcapp.go4lunch.di.manager.UserManager;
 import com.kcapp.go4lunch.model.User;
 import com.kcapp.go4lunch.model.places.GooglePlaceDetailResponse;
@@ -90,7 +90,7 @@ public class App {
      * Get the number of reservation for a place
      */
     public static void getCountOfReservation(String placeId, GetCountOfReservationCallback callback) {
-        UserManager firebaseUserManager = new FirebaseUserManager(App.getFirestore());
+        UserManager firebaseUserManager = Injection.getUserManager();
         firebaseUserManager.getUsersForAPlace(placeId, new UserManager.OnGetUsersForAPlaceCallback() {
             @Override
             public void onSuccess(List<User> users) {
@@ -114,7 +114,7 @@ public class App {
     public static void getUserPlace(GetUserPlaceCallback callback) {
         FirebaseUser firebaseUser = App.getFirebaseUser();
         if (firebaseUser != null) {
-            UserManager firebaseUserManager = new FirebaseUserManager(App.getFirestore());
+            UserManager firebaseUserManager = Injection.getUserManager();
             firebaseUserManager.getUser(firebaseUser.getUid(), new UserManager.OnGetUserCallback() {
                 @Override
                 public void onSuccess(User user) {

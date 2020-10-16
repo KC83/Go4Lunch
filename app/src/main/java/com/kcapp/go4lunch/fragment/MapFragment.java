@@ -53,6 +53,7 @@ public class MapFragment extends Fragment {
     GoogleMap mMap;
     Double mLat, mLng;
     SupportMapFragment mMapFragment;
+    View mMapView;
     FusedLocationProviderClient mClient;
     String mKeyword;
 
@@ -93,6 +94,8 @@ public class MapFragment extends Fragment {
 
             // Get places
             getPlaces();
+
+            mMapView.setContentDescription("MAP READY");
         }
     };
 
@@ -108,6 +111,11 @@ public class MapFragment extends Fragment {
 
         mMapFragment = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         if (mMapFragment != null) {
+            mMapView = mMapFragment.getView();
+            if (mMapView != null) {
+                mMapView.setContentDescription("MAP NOT READY");
+            }
+
             mMapFragment.getMapAsync(mCallback);
         }
 
@@ -123,6 +131,8 @@ public class MapFragment extends Fragment {
             getCurrentLocation();
             // Get places
             getPlaces();
+
+            mMapView.setContentDescription("MAP READY");
         }
     }
 
@@ -262,6 +272,7 @@ public class MapFragment extends Fragment {
         // Put the place on the map
         Marker marker = mMap.addMarker(markerOptions);
         marker.setTag(result.getPlaceId());
+        marker.setTitle(result.getName());
     }
 
     /**

@@ -22,7 +22,6 @@ import com.bumptech.glide.RequestManager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseUser;
 import com.kcapp.go4lunch.adapter.ListWorkmatesAdapter;
-import com.kcapp.go4lunch.api.helper.PlaceLikeHelper;
 import com.kcapp.go4lunch.api.helper.UserHelper;
 import com.kcapp.go4lunch.api.places.ApiGooglePlaces;
 import com.kcapp.go4lunch.api.places.PlacesCallback;
@@ -31,8 +30,7 @@ import com.kcapp.go4lunch.api.services.App;
 import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.api.services.InternetManager;
 import com.kcapp.go4lunch.api.services.InternetManagerImpl;
-import com.kcapp.go4lunch.di.manager.FirebasePlaceLikeManager;
-import com.kcapp.go4lunch.di.manager.FirebaseUserManager;
+import com.kcapp.go4lunch.di.Injection;
 import com.kcapp.go4lunch.di.manager.PlaceLikeManager;
 import com.kcapp.go4lunch.di.manager.UserManager;
 import com.kcapp.go4lunch.model.PlaceLike;
@@ -62,6 +60,8 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback, 
     private boolean mIsPlaceLunch;
 
     private InternetManager mInternetManager;
+    private UserManager mFirebaseUserManager;
+    private PlaceLikeManager mFirebasePlaceLikeManager;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -78,6 +78,11 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback, 
             return;
         }
         ApiGooglePlaces apiGooglePlaces = ApiGooglePlaces.retrofit.create(ApiGooglePlaces.class);
+
+        // UserManager
+        mFirebaseUserManager = Injection.getUserManager();
+        // PlaceLikeManager
+        mFirebasePlaceLikeManager = Injection.getPlaceLikeManager();
 
         // Get place
         PlacesRepositoryImpl placesRepository = new PlacesRepositoryImpl(mInternetManager, apiGooglePlaces);
@@ -230,14 +235,13 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback, 
      * @param isClicked if true, the "place like" is created or deleted
      */
     private void onLikeButtonClicked(boolean isClicked) {
-        PlaceLikeManager firebasePlaceLikeManager = new FirebasePlaceLikeManager(App.getFirestore());
-        firebasePlaceLikeManager.getPlaceLike(mFirebaseUser.getUid(), mPlaceId, new PlaceLikeManager.OnGetPlaceLikeCallback() {
+        mFirebasePlaceLikeManager.getPlaceLike(mFirebaseUser.getUid(), mPlaceId, new PlaceLikeManager.OnGetPlaceLikeCallback() {
             @Override
             public void onSuccess(PlaceLike placeLike) {
                 if (placeLike.getUid() != null) {
                     if (isClicked) {
                         // Delete action
-                        firebasePlaceLikeManager.deletePlaceLike(placeLike.getUid(), new PlaceLikeManager.OnDeletePlaceLikeCallback() {
+                        mFirebasePlaceLikeManager.deletePlaceLike(placeLike.getUid(), new PlaceLikeManager.OnDeletePlaceLikeCallback() {
                             @Override
                             public void onSuccess(boolean isDeleted) {
                                 // Set to false
@@ -259,7 +263,7 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback, 
                 } else {
                     if (isClicked) {
                         // Create action
-                        firebasePlaceLikeManager.createPlaceLike(mFirebaseUser.getUid(), mPlaceId, new PlaceLikeManager.OnCreatePlaceLikeCallback() {
+                        mFirebasePlaceLikeManager.createPlaceLike(mFirebaseUser.getUid(), mPlaceId, new PlaceLikeManager.OnCreatePlaceLikeCallback() {
                             @Override
                             public void onSuccess(PlaceLike placeLike) {
                                 // Set to true
@@ -313,8 +317,7 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback, 
      * @param isClicked if true, the "place lunch" is created or deleted
      */
     private void onLunchButtonClicked(boolean isClicked) {
-        UserManager firebaseUserManager = new FirebaseUserManager(App.getFirestore());
-        firebaseUserManager.getUser(mFirebaseUser.getUid(), new UserManager.OnGetUserCallback() {
+        mFirebaseUserManager.getUser(mFirebaseUser.getUid(), new UserManager.OnGetUserCallback() {
             @Override
             public void onSuccess(User user) {
                 // Current user is going to this place today
@@ -322,7 +325,7 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback, 
                     // If clicked, the current user don't go there anymore
                     if (isClicked) {
                         // Update place, remove placeId and placeDate
-                        firebaseUserManager.updatePlace(mFirebaseUser.getUid(), null, null, new UserManager.OnUpdatePlaceCallback() {
+                        mFirebaseUserManager.updatePlace(mFirebaseUser.getUid(), null, null, new UserManager.OnUpdatePlaceCallback() {
                             @Override
                             public void onSuccess(User user) {
                                 mIsPlaceLunch = false;
@@ -342,7 +345,7 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback, 
                     // If clicked, the current user go there
                     if (isClicked) {
                         // Update place
-                        firebaseUserManager.updatePlace(mFirebaseUser.getUid(), mPlaceId, App.getTodayDate(), new UserManager.OnUpdatePlaceCallback() {
+                        mFirebaseUserManager.updatePlace(mFirebaseUser.getUid(), mPlaceId, App.getTodayDate(), new UserManager.OnUpdatePlaceCallback() {
                             @Override
                             public void onSuccess(User user) {
                                 mIsPlaceLunch = true;

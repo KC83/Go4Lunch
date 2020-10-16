@@ -13,10 +13,8 @@ import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.kcapp.go4lunch.api.services.App;
 import com.kcapp.go4lunch.api.services.Constants;
-import com.kcapp.go4lunch.api.helper.UserHelper;
-import com.kcapp.go4lunch.di.manager.FirebaseUserManager;
+import com.kcapp.go4lunch.di.Injection;
 import com.kcapp.go4lunch.di.manager.UserManager;
 import com.kcapp.go4lunch.model.User;
 
@@ -24,6 +22,8 @@ import java.util.Collections;
 import java.util.List;
 
 public class AuthActivity extends AppCompatActivity {
+    private UserManager mFirebaseUserManager;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +31,9 @@ public class AuthActivity extends AppCompatActivity {
         setContentView(R.layout.activity_auth);
 
         initButtons();
+
+        // UserManager
+        mFirebaseUserManager = Injection.getUserManager();
     }
 
     @Override
@@ -101,8 +104,7 @@ public class AuthActivity extends AppCompatActivity {
             String email = currentUser.getEmail();
             String urlPicture = (currentUser.getPhotoUrl() != null) ? currentUser.getPhotoUrl().toString() : null;
 
-            UserManager firebaseUserManager = new FirebaseUserManager(App.getFirestore());
-            firebaseUserManager.createUser(uid, username, email, urlPicture, new UserManager.OnUserCreationCallback() {
+            mFirebaseUserManager.createUser(uid, username, email, urlPicture, new UserManager.OnUserCreationCallback() {
                 @Override
                 public void onSuccess(User user) {
                     Toast.makeText(getApplicationContext(), getString(R.string.connection_succeed), Toast.LENGTH_SHORT).show();
