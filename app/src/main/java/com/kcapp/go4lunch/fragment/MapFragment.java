@@ -242,12 +242,11 @@ public class MapFragment extends Fragment {
             String placeId = (String) marker.getTag();
             marker.hideInfoWindow();
 
-
             Intent intent = new Intent(getContext(), PlaceActivity.class);
             intent.putExtra(Constants.PLACE_ID, placeId);
             startActivityForResult(intent, Constants.CODE_REQUEST_MAP_FRAGMENT);
 
-            return false;
+            return true;
         });
     }
 
