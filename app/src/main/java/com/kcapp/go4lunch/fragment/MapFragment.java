@@ -49,6 +49,8 @@ import com.kcapp.go4lunch.model.places.GooglePlaceDetailResponse;
 import com.kcapp.go4lunch.model.places.GooglePlacesResponse;
 import com.kcapp.go4lunch.model.places.result.Result;
 
+import org.jetbrains.annotations.NotNull;
+
 public class MapFragment extends Fragment {
     GoogleMap mMap;
     Double mLat, mLng;
@@ -56,6 +58,8 @@ public class MapFragment extends Fragment {
     View mMapView;
     FusedLocationProviderClient mClient;
     String mKeyword;
+
+    Context mContext;
 
     public static MapFragment newInstance(String keyword) {
         MapFragment mapFragment = new MapFragment();
@@ -88,8 +92,8 @@ public class MapFragment extends Fragment {
             googleMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
             googleMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
 
-            if (getContext() != null) {
-                boolean success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(getContext(), R.raw.style_json));
+            if (mContext != null) {
+                boolean success = googleMap.setMapStyle(MapStyleOptions.loadRawResourceStyle(mContext, R.raw.style_json));
             }
 
             // Get places
@@ -120,9 +124,9 @@ public class MapFragment extends Fragment {
         }
 
         // Check context
-        if (this.getContext() != null) {
+        if (mContext != null) {
             // Initialize fused location
-            mClient = LocationServices.getFusedLocationProviderClient(this.getContext());
+            mClient = LocationServices.getFusedLocationProviderClient(mContext);
             // Get keyword if it's a search
             if (getArguments() != null) {
                 mKeyword = getArguments().getString(Constants.EXTRA_KEYWORD_MAP_FRAGMENT);
@@ -150,12 +154,12 @@ public class MapFragment extends Fragment {
      */
     private void getCurrentLocation() {
         // Check context
-        if (this.getContext() == null) {
+        if (mContext == null) {
             return;
         }
 
         // Check permission
-        if (ActivityCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this.getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
 
@@ -207,8 +211,7 @@ public class MapFragment extends Fragment {
 
         String location = mLat + "," + mLng;
 
-        Context context = this.getContext();
-        InternetManager internetManager = new InternetManagerImpl(context);
+        InternetManager internetManager = new InternetManagerImpl(mContext);
         ApiGooglePlaces apiGooglePlaces = ApiGooglePlaces.retrofit.create(ApiGooglePlaces.class);
 
         PlacesRepository placesRepository = new PlacesRepositoryImpl(internetManager, apiGooglePlaces);
@@ -228,9 +231,9 @@ public class MapFragment extends Fragment {
             @Override
             public void onError(Exception exception) {
                 if (!internetManager.isConnected()) {
-                    Toast.makeText(getContext(), getString(R.string.error_no_internet), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, getString(R.string.error_no_internet), Toast.LENGTH_SHORT).show();
                 } else {
-                    Toast.makeText(getContext(), "Error : "+exception.getMessage(), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(mContext, "Error : "+exception.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -242,7 +245,7 @@ public class MapFragment extends Fragment {
             String placeId = (String) marker.getTag();
             marker.hideInfoWindow();
 
-            Intent intent = new Intent(getContext(), PlaceActivity.class);
+            Intent intent = new Intent(mContext, PlaceActivity.class);
             intent.putExtra(Constants.PLACE_ID, placeId);
             startActivityForResult(intent, Constants.CODE_REQUEST_MAP_FRAGMENT);
 
@@ -286,5 +289,17 @@ public class MapFragment extends Fragment {
         drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
         drawable.draw(canvas);
         return BitmapDescriptorFactory.fromBitmap(bitmap);
+    }
+
+    @Override
+    public void onAttach(@NotNull Context context) {
+        super.onAttach(context);
+        mContext = context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mContext = null;
     }
 }

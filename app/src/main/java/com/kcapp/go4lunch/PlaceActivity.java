@@ -304,11 +304,15 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback, 
             mPlaceName.setCompoundDrawablesWithIntrinsicBounds(0, 0, R.drawable.ic_star_yellow, 0);
             // Set text of the button
             mLikeButton.setText(R.string.dislike);
+            // Set description
+            mLikeButton.setContentDescription(getString(R.string.button_check));
         } else {
             // Remove favorite icon
             mPlaceName.setCompoundDrawablesWithIntrinsicBounds(0,0,0,0);
             // Set text of the button
             mLikeButton.setText(R.string.like);
+            // Set description
+            mLikeButton.setContentDescription(getString(R.string.button_uncheck));
         }
     }
 
@@ -381,9 +385,11 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback, 
         if (mIsPlaceLunch) {
             // Change the button with a uncheck icon
             mLunchButton.setImageResource(R.drawable.ic_check);
+            mLunchButton.setContentDescription(getString(R.string.button_check));
         } else {
             // Change the button with a uncheck icon
             mLunchButton.setImageResource(R.drawable.ic_uncheck);
+            mLunchButton.setContentDescription(getString(R.string.button_uncheck));
         }
     }
 

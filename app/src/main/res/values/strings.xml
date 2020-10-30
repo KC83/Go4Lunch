@@ -67,4 +67,7 @@
     <string name="place_joining">vient !</string>
     <string name="place_dont_decided">n\'a pas encore décidé</string>
     <string name="place_not_selected">Vous n\'avez pas encore sélectionné un restaurant</string>
+
+    <string name="button_check" translatable="false">Button check</string>
+    <string name="button_uncheck" translatable="false">Button uncheck</string>
 </resources>

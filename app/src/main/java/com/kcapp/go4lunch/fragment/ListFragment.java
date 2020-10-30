@@ -1,6 +1,7 @@
 package com.kcapp.go4lunch.fragment;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
@@ -35,6 +36,8 @@ import com.kcapp.go4lunch.model.places.GooglePlaceDetailResponse;
 import com.kcapp.go4lunch.model.places.GooglePlacesResponse;
 import com.kcapp.go4lunch.model.places.result.Result;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 
 public class ListFragment extends Fragment implements ListPlacesAdapter.ListPlacesListener {
@@ -48,6 +51,8 @@ public class ListFragment extends Fragment implements ListPlacesAdapter.ListPlac
     ApiGooglePlaces mApiGooglePlaces;
     InternetManager mInternetManager;
     PlacesRepository mPlacesRepository;
+
+    Context mContext;
 
     public static ListFragment newInstance(String keyword) {
         ListFragment listFragment = new ListFragment();
@@ -67,12 +72,12 @@ public class ListFragment extends Fragment implements ListPlacesAdapter.ListPlac
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        if (getContext() == null) {
+        if (mContext == null) {
             return;
         }
 
         // Initialize internet manager
-        mInternetManager = new InternetManagerImpl(getContext());
+        mInternetManager = new InternetManagerImpl(mContext);
         if (!mInternetManager.isConnected()) {
             TextView information = view.findViewById(R.id.fragment_list_information);
             information.setText(R.string.error_no_internet);
@@ -81,10 +86,10 @@ public class ListFragment extends Fragment implements ListPlacesAdapter.ListPlac
         }
 
         // Initialize fused location
-        FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(getContext());
+        FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(mContext);
 
         // Check permission
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if (ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(mContext, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
 
@@ -131,9 +136,9 @@ public class ListFragment extends Fragment implements ListPlacesAdapter.ListPlac
             @Override
             public void onPlacesAvailable(GooglePlacesResponse places) {
                 mResults = places.getResults();
-                mListPlacesAdapter = new ListPlacesAdapter(mResults, getContext(), mLat, mLng, ListFragment.this);
+                mListPlacesAdapter = new ListPlacesAdapter(mResults, mContext, mLat, mLng, ListFragment.this);
 
-                mListPlaces.setLayoutManager(new LinearLayoutManager(getContext()));
+                mListPlaces.setLayoutManager(new LinearLayoutManager(mContext));
                 mListPlaces.setAdapter(mListPlacesAdapter);
             }
 
@@ -142,15 +147,27 @@ public class ListFragment extends Fragment implements ListPlacesAdapter.ListPlac
 
             @Override
             public void onError(Exception exception) {
-                Toast.makeText(getContext(), "Error : "+exception.getMessage(), Toast.LENGTH_SHORT).show();
+                Toast.makeText(mContext, "Error : "+exception.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
     }
 
     @Override
     public void onClick(String placeId) {
-        Intent intent = new Intent(getContext(), PlaceActivity.class);
+        Intent intent = new Intent(mContext, PlaceActivity.class);
         intent.putExtra(Constants.PLACE_ID, placeId);
         startActivityForResult(intent, Constants.CODE_REQUEST_LIST_FRAGMENT);
+    }
+
+    @Override
+    public void onAttach(@NotNull Context context) {
+        super.onAttach(context);
+        mContext = context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        mContext = null;
     }
 }
