@@ -4,11 +4,23 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+
+        <!-- Active thumb color -->
+        <item name="colorControlActivated">@color/colorPrimary</item>
+        <!-- Inactive thumb color -->
+        <item name="colorSwitchThumbNormal">@color/colorAccentGray</item>
     </style>
 
     <style name="AppTheme.NoActionBar">
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+    </style>
+
+    <style name="AppThemeSwitch" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Active thumb color & Active track color(30% transparency) -->
+        <item name="colorControlActivated">@color/colorPrimary</item>
+        <!-- Inactive thumb color -->
+        <item name="colorSwitchThumbNormal">@color/colorAccentGray</item>
     </style>
 
     <style name="AppTheme.NoActionBar.Translucent">

@@ -52,4 +52,8 @@
     <string name="place_joining">is joining !</string>
     <string name="place_dont_decided">hasn\'t decided yet</string>
     <string name="place_not_selected">You still hasn\'t selected a restaurant</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="notification_header">Notification</string>
+    <string name="send_notification_title">Send me a notification at lunch</string>
+    <string name="settings_saved">Settings saved</string>
 </resources>

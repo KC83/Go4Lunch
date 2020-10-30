@@ -24,15 +24,14 @@ public class UserHelper {
         return FirebaseFirestore.getInstance().collection(Constants.USER_COLLECTION_NAME);
     }
 
-    // CREATE USER
-    public static Task<Void> createUser(String uid, String username, String email, String urlPicture) {
-        User userToCreate = new User(uid, username, email, urlPicture);
-        return UserHelper.getUsersCollection().document(uid).set(userToCreate);
+    // UPDATE USER
+    public static Task<Void> updateUser(User user) {
+        return UserHelper.getUsersCollection().document(user.getUid()).set(user);
     }
-    public static Task<Void> createUser(FirebaseFirestore firestore, String uid, String username, String email, String urlPicture) {
-        User userToCreate = new User(uid, username, email, urlPicture);
-        return UserHelper.getUsersCollection(firestore).document(uid).set(userToCreate);
+    public static Task<Void> updateUser(FirebaseFirestore firestore,User user) {
+        return UserHelper.getUsersCollection(firestore).document(user.getUid()).set(user);
     }
+
     // GET USER
     public static Task<DocumentSnapshot> getUser(String uid) {
         return UserHelper.getUsersCollection().document(uid).get();

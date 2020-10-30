@@ -33,4 +33,17 @@ public interface UserManager {
         void onSuccess(User user);
         void onError(Throwable throwable);
     }
+
+    void updateUser(User user, OnUpdateUserCallback callback);
+    interface OnUpdateUserCallback {
+        void onSuccess(User user);
+        void onError(Throwable throwable);
+    }
+
+    // Update notification user
+    void updateNotificationUser(String uid, String sendNotification, OnUpdateNotificationUserCallback callback);
+    interface OnUpdateNotificationUserCallback {
+        void onSuccess(User user);
+        void onError(Throwable throwable);
+    }
 }

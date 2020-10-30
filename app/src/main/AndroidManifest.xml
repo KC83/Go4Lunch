@@ -2,7 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     package="com.kcapp.go4lunch">
-
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
          Google Maps Android API v2, but you must specify either coarse or fine
@@ -21,6 +20,10 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="AllowBackup">
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/title_activity_settings"
+            android:theme="@style/AppTheme"/>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
@@ -33,11 +36,9 @@
             android:value="@string/facebook_app_id"
             tools:replace="android:value" />
 
-
         <uses-library
             android:name="org.apache.http.legacy"
             android:required="false" />
-
 
         <activity
             android:name=".MainActivity"
@@ -69,10 +70,10 @@
                 <data android:scheme="@string/fb_login_protocol_scheme" />
             </intent-filter>
         </activity>
-        <activity android:name=".PlaceActivity"
-            android:theme="@style/AppTheme.NoActionBar.Translucent"
-            android:fitsSystemWindows="true" />
-
+        <activity
+            android:name=".PlaceActivity"
+            android:fitsSystemWindows="true"
+            android:theme="@style/AppTheme.NoActionBar.Translucent" />
     </application>
 
 </manifest>

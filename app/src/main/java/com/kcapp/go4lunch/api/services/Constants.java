@@ -46,4 +46,11 @@ public final class Constants {
     public static final int CODE_REQUEST_MAP_FRAGMENT = 2000;
     public static final int CODE_REQUEST_LIST_FRAGMENT = 3000;
     public static final int CODE_REQUEST_WORKMATES_FRAGMENT = 4000;
+
+    /**
+     * SETTINGS ACTIVITY
+     */
+    public static final int CODE_REQUEST_SETTINGS_ACTIVITY = 7000;
+    public static final String SEND_NOTIFICATION_TRUE = "true";
+    public static final String SEND_NOTIFICATION_FALSE = "false";
 }

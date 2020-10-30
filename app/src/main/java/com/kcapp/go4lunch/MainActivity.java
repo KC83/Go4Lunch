@@ -118,6 +118,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             case R.id.nav_settings:
                 System.out.println("MainActivity :: onOptionsItemSelected :: nav_settings");
                 mDrawerLayout.closeDrawer(GravityCompat.START);
+
+                Intent intent = new Intent(getApplicationContext(), SettingsActivity.class);
+                startActivityForResult(intent, Constants.CODE_REQUEST_SETTINGS_ACTIVITY);
+
                 return false;
             case R.id.nav_logout:
                 System.out.println("MainActivity :: onOptionsItemSelected :: nav_logout");

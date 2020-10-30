@@ -68,6 +68,20 @@
     <string name="place_dont_decided">n\'a pas encore décidé</string>
     <string name="place_not_selected">Vous n\'avez pas encore sélectionné un restaurant</string>
 
+    <!-- SETTINGS ACTIVITY -->
+    <string name="settings_saved">Paramètres sauvegardés</string>
+
     <string name="button_check" translatable="false">Button check</string>
     <string name="button_uncheck" translatable="false">Button uncheck</string>
+
+
+    <!-- Sync -->
+    <string name="title_activity_settings">Paramètres</string>
+
+    <!-- Preference Titles -->
+    <string name="notification_header">Notification</string>
+
+    <!-- Sync Preferences -->
+    <string name="send_notification_title">" Envoyez-moi une notification au déjeuner"</string>
+    <string name="key_notification" translatable="false">key_notification</string>
 </resources>

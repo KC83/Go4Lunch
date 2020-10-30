@@ -6,6 +6,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.kcapp.go4lunch.api.helper.UserHelper;
 import com.kcapp.go4lunch.api.services.App;
+import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.di.Injection;
 import com.kcapp.go4lunch.model.User;
 
@@ -33,15 +34,21 @@ public class FirebaseUserManager implements UserManager {
                 user.setEmail(email);
                 user.setUrlPicture(urlPicture);
 
+                if (user.getSendNotification() == null) {
+                    user.setSendNotification(Constants.SEND_NOTIFICATION_TRUE);
+                }
 
-                Task<Void> task = UserHelper.getUsersCollection(mFirestore).document(uid).set(user);
-                task.addOnCompleteListener(task1 -> {
-                    if (task1.isSuccessful()) {
+                firebaseUserManager.updateUser(user, new OnUpdateUserCallback() {
+                    @Override
+                    public void onSuccess(User user) {
                         callback.onSuccess(user);
-                    } else {
-                        callback.onError(new Exception("Error creation of a user"));
                     }
-                }).addOnFailureListener(callback::onError);
+
+                    @Override
+                    public void onError(Throwable throwable) {
+                        callback.onError(throwable);
+                    }
+                });
             }
 
             @Override
@@ -53,7 +60,7 @@ public class FirebaseUserManager implements UserManager {
 
     @Override
     public void getUser(String uid, OnGetUserCallback callback) {
-        Task<DocumentSnapshot> task = UserHelper.getUser(uid);
+        Task<DocumentSnapshot> task = UserHelper.getUser(mFirestore, uid);
         task.addOnCompleteListener(task1 -> {
             if (task1.isSuccessful()) {
                 if (task1.getResult().exists()) {
@@ -112,6 +119,46 @@ public class FirebaseUserManager implements UserManager {
                 callback.onError(new Exception("Error : task not successful"));
             }
 
+        });
+    }
+
+    @Override
+    public void updateUser(User user, OnUpdateUserCallback callback) {
+        Task<Void> task = UserHelper.updateUser(mFirestore, user);
+        task.addOnCompleteListener(task1 -> {
+            if (task1.isSuccessful()) {
+                callback.onSuccess(user);
+            } else {
+                callback.onError(new Exception("Error creation of a user"));
+            }
+        }).addOnFailureListener(callback::onError);
+    }
+
+    @Override
+    public void updateNotificationUser(String uid, String sendNotification, OnUpdateNotificationUserCallback callback) {
+        UserManager firebaseUserManager = Injection.getUserManager(mFirestore);
+        firebaseUserManager.getUser(uid, new OnGetUserCallback() {
+            @Override
+            public void onSuccess(User user) {
+                user.setSendNotification(sendNotification);
+
+                firebaseUserManager.updateUser(user, new OnUpdateUserCallback() {
+                    @Override
+                    public void onSuccess(User user) {
+                        callback.onSuccess(user);
+                    }
+
+                    @Override
+                    public void onError(Throwable throwable) {
+                        callback.onError(throwable);
+                    }
+                });
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                callback.onError(throwable);
+            }
         });
     }
 }
