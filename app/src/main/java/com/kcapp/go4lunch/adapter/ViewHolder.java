@@ -179,7 +179,7 @@ class ViewHolder extends RecyclerView.ViewHolder {
             mItemWorkmateTitle.setText(String.format("%s %s", user.getUsername(), mContext.getString(R.string.place_joining)));
         } else if (activity.equals(Constants.WORKMATES_FRAMGMENT)) {
             if (user.getPlaceId() != null && user.getPlaceDate() != null && user.getPlaceDate().equals(App.getTodayDate())) {
-                App.getNamePlace(mContext, user.getPlaceId(), placeName -> mItemWorkmateTitle.setText(String.format("%s (%s)", user.getUsername(), placeName)));
+                App.getPlace(mContext, user.getPlaceId(), place -> mItemWorkmateTitle.setText(String.format("%s (%s)", user.getUsername(), place.getName())));
                 mItemWorkmateTitle.setTypeface(mItemWorkmateTitle.getTypeface(), Typeface.BOLD);
             } else {
                 mItemWorkmateTitle.setText(String.format("%s %s", user.getUsername(), mContext.getString(R.string.place_dont_decided)));

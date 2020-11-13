@@ -82,6 +82,8 @@
     <string name="notification_header">Notification</string>
 
     <!-- Sync Preferences -->
-    <string name="send_notification_title">" Envoyez-moi une notification au déjeuner"</string>
+    <string name="send_notification_title">Envoyez-moi une notification au déjeuner</string>
     <string name="key_notification" translatable="false">key_notification</string>
+
+    <string name="notification_title">Vous déjeunez quelque part ce midi !</string>
 </resources>

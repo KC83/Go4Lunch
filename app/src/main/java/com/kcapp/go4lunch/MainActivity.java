@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -24,6 +25,12 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.view.GravityCompat;
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.Fragment;
+import androidx.work.Constraints;
+import androidx.work.Data;
+import androidx.work.NetworkType;
+import androidx.work.OneTimeWorkRequest;
+import androidx.work.PeriodicWorkRequest;
+import androidx.work.WorkManager;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
@@ -40,14 +47,22 @@ import com.google.android.libraries.places.widget.model.AutocompleteActivityMode
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.android.material.navigation.NavigationView;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.kcapp.go4lunch.api.services.App;
 import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.fragment.ListFragment;
 import com.kcapp.go4lunch.fragment.MapFragment;
 import com.kcapp.go4lunch.fragment.WorkmatesFragment;
+import com.kcapp.go4lunch.model.User;
+import com.kcapp.go4lunch.notification.NotificationService;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
     private DrawerLayout mDrawerLayout;
@@ -77,6 +92,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (!Places.isInitialized()) {
                 Places.initialize(getApplicationContext(), getString(R.string.google_api_key));
             }
+
+            doNotificationService();
         }
     }
 
@@ -316,5 +333,47 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if (fragment != null) {
             getSupportFragmentManager().beginTransaction().replace(R.id.fragment_container, fragment).commit();
         }
+    }
+
+    private void doNotificationService() {
+        Calendar currentDate = Calendar.getInstance();
+        Calendar dueDate = Calendar.getInstance();
+
+        // Set Execution around 12:00:00 AM
+        dueDate.set(Calendar.HOUR_OF_DAY, 12);
+        dueDate.set(Calendar.MINUTE, 0);
+        dueDate.set(Calendar.SECOND, 0);
+        if (dueDate.before(currentDate)) {
+            dueDate.add(Calendar.HOUR_OF_DAY, 24);
+        }
+        long timeDiff = dueDate.getTimeInMillis() - currentDate.getTimeInMillis();
+
+        Constraints constraints = new Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build();
+
+        Data.Builder data = new Data.Builder();
+        App.getUserPlace(placeId -> {
+            if(placeId != null) {
+                data.putString(Constants.NOTIFICATION_PLACE_ID, placeId);
+                App.getPlace(this, placeId, place -> {
+                    data.putString(Constants.NOTIFICATION_PLACE_NAME,place.getName());
+                    data.putString(Constants.NOTIFICATION_PLACE_VICINITY,place.getVicinity());
+
+                    App.getUsersForAPlace(placeId, users -> {
+                        Type listType = new TypeToken<List<User>>() {}.getType();
+                        Gson gson = new Gson();
+                        data.putString(Constants.NOTIFICATION_USERS_JSON,gson.toJson(users, listType));
+
+                        PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(NotificationService.class, 1, TimeUnit.DAYS)
+                                .setConstraints(constraints)
+                                .setInitialDelay(timeDiff, TimeUnit.MILLISECONDS)
+                                .setInputData(data.build())
+                                .build();
+                        WorkManager.getInstance(this).enqueue(periodicWorkRequest);
+                    });
+                });
+            }
+        });
     }
 }

@@ -14,6 +14,7 @@ import com.kcapp.go4lunch.di.manager.UserManager;
 import com.kcapp.go4lunch.model.User;
 import com.kcapp.go4lunch.model.places.GooglePlaceDetailResponse;
 import com.kcapp.go4lunch.model.places.GooglePlacesResponse;
+import com.kcapp.go4lunch.model.places.result.Result;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -52,8 +53,8 @@ public class App {
     /**
      * Interface to get the name of a place
      */
-    public interface GetNamePlaceCallback {
-        void onCompleted(String placeName);
+    public interface GetPlaceCallback {
+        void onCompleted(Result place);
     }
     /**
      * Get a place name
@@ -61,7 +62,7 @@ public class App {
      * @param placeId placeId of a place
      * @param callback Callback
      */
-    public static void getNamePlace(Context context, String placeId, GetNamePlaceCallback callback) {
+    public static void getPlace(Context context, String placeId, GetPlaceCallback callback) {
         InternetManager internetManager = new InternetManagerImpl(context);
         ApiGooglePlaces apiGooglePlaces = ApiGooglePlaces.retrofit.create(ApiGooglePlaces.class);
 
@@ -72,7 +73,7 @@ public class App {
 
             @Override
             public void onPlaceDetailAvailable(GooglePlaceDetailResponse place) {
-                callback.onCompleted(place.getResult().getName());
+                callback.onCompleted(place.getResult());
             }
 
             @Override
@@ -134,6 +135,26 @@ public class App {
             });
         } else {
             callback.onCompleted(null);
+        }
+    }
+
+    public interface GetUsersForAPlaceCallback {
+        void onCompleted(List<User> users);
+    }
+    public static void getUsersForAPlace(String placeId, GetUsersForAPlaceCallback callback) {
+        FirebaseUser firebaseUser = App.getFirebaseUser();
+        if (firebaseUser != null) {
+            UserManager firebaseUserManager = Injection.getUserManager();
+            firebaseUserManager.getUsersForAPlace(placeId, new UserManager.OnGetUsersForAPlaceCallback() {
+                @Override
+                public void onSuccess(List<User> users) {
+                    // Send notification
+                    callback.onCompleted(users);
+                }
+
+                @Override
+                public void onError(Throwable throwable) {}
+            });
         }
     }
 }

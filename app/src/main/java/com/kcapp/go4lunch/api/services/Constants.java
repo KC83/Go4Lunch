@@ -53,4 +53,15 @@ public final class Constants {
     public static final int CODE_REQUEST_SETTINGS_ACTIVITY = 7000;
     public static final String SEND_NOTIFICATION_TRUE = "true";
     public static final String SEND_NOTIFICATION_FALSE = "false";
+
+    /**
+     * NOTIFICATIONS
+     */
+    public static final int NOTIFICATION_ID = 8000;
+    public static final String NOTIFICATION_TAG = "NOTIFICATION_TAG";
+
+    public static final String NOTIFICATION_PLACE_ID = "placeId";
+    public static final String NOTIFICATION_PLACE_NAME = "placeName";
+    public static final String NOTIFICATION_PLACE_VICINITY = "placeVicinity";
+    public static final String NOTIFICATION_USERS_JSON = "usersJson";
 }
