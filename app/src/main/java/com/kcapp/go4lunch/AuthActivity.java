@@ -11,8 +11,11 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.OAuthProvider;
 import com.kcapp.go4lunch.api.services.Constants;
 import com.kcapp.go4lunch.di.Injection;
 import com.kcapp.go4lunch.di.manager.UserManager;
@@ -20,10 +23,10 @@ import com.kcapp.go4lunch.model.User;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 public class AuthActivity extends AppCompatActivity {
     private UserManager mFirebaseUserManager;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,9 +48,11 @@ public class AuthActivity extends AppCompatActivity {
     private void initButtons() {
         Button facebookButton = findViewById(R.id.auth_activity_button_login_facebook);
         Button googleButton = findViewById(R.id.auth_activity_button_login_google);
+        Button twitterButton = findViewById(R.id.auth_activity_button_login_twitter);
 
         facebookButton.setOnClickListener(v -> authWithFacebook());
         googleButton.setOnClickListener(v -> authWithGoogle());
+        twitterButton.setOnClickListener(v -> authWithTwitter());
     }
     private void authWithFacebook() {
         Log.d("TAG", "AuthActivity::authWithFacebook");
@@ -74,6 +79,29 @@ public class AuthActivity extends AppCompatActivity {
                         .setIsSmartLockEnabled(false, true)
                         .build(),
                 Constants.RC_SIGN_IN);
+    }
+    private void authWithTwitter() {
+        Log.d("TAG", "AuthActivity::authWithTwitter");
+
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
+        OAuthProvider.Builder provider = OAuthProvider.newBuilder("twitter.com");
+        Task<AuthResult> pendingResultTask = firebaseAuth.getPendingAuthResult();
+        if (pendingResultTask != null) {
+            Log.d("TAG", "AuthActivity::authWithTwitter :: is not null");
+            pendingResultTask
+                    .addOnSuccessListener(authResult -> createUserInFirebase())
+                    .addOnFailureListener(e -> Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_SHORT).show());
+        } else {
+            Log.d("TAG", "AuthActivity::authWithTwitter :: is null");
+            firebaseAuth
+                    .startActivityForSignInWithProvider(this, provider.build())
+                    .addOnSuccessListener(authResult -> createUserInFirebase()
+                    )
+                    .addOnFailureListener(e -> {
+                        Log.d("TAG", Objects.requireNonNull(e.getMessage()));
+                        Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_SHORT).show();
+                    });
+        }
     }
 
     private void handleResponseAfterSignIn(int requestCode, int resultCode, Intent data){
