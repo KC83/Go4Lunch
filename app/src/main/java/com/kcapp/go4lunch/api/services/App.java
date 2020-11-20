@@ -99,7 +99,7 @@ public class App {
             }
 
             @Override
-            public void onError(Throwable throwable) {}
+            public void onError() {}
         });
     }
 
@@ -129,9 +129,7 @@ public class App {
                 }
 
                 @Override
-                public void onError(Throwable throwable) {
-
-                }
+                public void onError() {}
             });
         } else {
             callback.onCompleted(null);
@@ -153,7 +151,7 @@ public class App {
                 }
 
                 @Override
-                public void onError(Throwable throwable) {}
+                public void onError() {}
             });
         }
     }

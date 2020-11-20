@@ -6,7 +6,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -28,7 +27,6 @@ import androidx.fragment.app.Fragment;
 import androidx.work.Constraints;
 import androidx.work.Data;
 import androidx.work.NetworkType;
-import androidx.work.OneTimeWorkRequest;
 import androidx.work.PeriodicWorkRequest;
 import androidx.work.WorkManager;
 
@@ -55,12 +53,11 @@ import com.kcapp.go4lunch.fragment.ListFragment;
 import com.kcapp.go4lunch.fragment.MapFragment;
 import com.kcapp.go4lunch.fragment.WorkmatesFragment;
 import com.kcapp.go4lunch.model.User;
-import com.kcapp.go4lunch.notification.NotificationService;
+import com.kcapp.go4lunch.notification.NotificationWorker;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -111,6 +108,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             mDrawerLayout.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
+            //finish();
         }
     }
 
@@ -365,7 +363,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         Gson gson = new Gson();
                         data.putString(Constants.NOTIFICATION_USERS_JSON,gson.toJson(users, listType));
 
-                        PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(NotificationService.class, 1, TimeUnit.DAYS)
+                        PeriodicWorkRequest periodicWorkRequest = new PeriodicWorkRequest.Builder(NotificationWorker.class, 1, TimeUnit.DAYS)
                                 .setConstraints(constraints)
                                 .setInitialDelay(timeDiff, TimeUnit.MILLISECONDS)
                                 .setInputData(data.build())

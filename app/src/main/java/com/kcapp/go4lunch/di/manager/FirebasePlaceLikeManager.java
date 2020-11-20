@@ -35,13 +35,13 @@ public class FirebasePlaceLikeManager implements PlaceLikeManager {
                         }
 
                         @Override
-                        public void onError(Throwable throwable) {
-                            callback.onError(new Exception(throwable.getMessage()));
+                        public void onError() {
+                            callback.onError();
                         }
                     });
                 })
                 .addOnFailureListener(e -> {
-                    callback.onError(new Exception("Error : "+e.getMessage()));
+                    callback.onError();
                 });
     }
 
@@ -57,13 +57,13 @@ public class FirebasePlaceLikeManager implements PlaceLikeManager {
                         placeLike.setUid(task1.getResult().getDocuments().get(0).getId());
                         callback.onSuccess(placeLike);
                     } else {
-                        callback.onError(new Exception("PlaceLike not find"));
+                        callback.onError();
                     }
                 } else {
                     callback.onSuccess(new PlaceLike());
                 }
             } else {
-                callback.onError(new Exception("Error get placeLike"));
+                callback.onError();
             }
         });
     }
@@ -74,6 +74,6 @@ public class FirebasePlaceLikeManager implements PlaceLikeManager {
                 .document(uid)
                 .delete()
                 .addOnSuccessListener(aVoid -> callback.onSuccess(true))
-                .addOnFailureListener(e -> callback.onError(new Exception("Error : placeLike not deleted")));
+                .addOnFailureListener(e -> callback.onError());
     }
 }

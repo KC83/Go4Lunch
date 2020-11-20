@@ -74,14 +74,6 @@
             android:name=".PlaceActivity"
             android:fitsSystemWindows="true"
             android:theme="@style/AppTheme.NoActionBar.Translucent" />
-
-        <service
-            android:name=".notification.NotificationService"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="com.google.firebase.MESSAGING_EVENT" />
-            </intent-filter>
-        </service>
     </application>
 
 </manifest>

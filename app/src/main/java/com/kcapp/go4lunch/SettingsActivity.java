@@ -61,8 +61,8 @@ public class SettingsActivity extends AppCompatActivity {
                         }
 
                         @Override
-                        public void onError(Throwable throwable) {
-                            Toast.makeText(getContext(), throwable.getMessage(), Toast.LENGTH_LONG).show();
+                        public void onError() {
+                            Toast.makeText(getContext(), getString(R.string.error_unknown_error), Toast.LENGTH_LONG).show();
                         }
                     });
                     return true;

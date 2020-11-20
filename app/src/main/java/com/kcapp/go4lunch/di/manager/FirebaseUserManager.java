@@ -45,15 +45,15 @@ public class FirebaseUserManager implements UserManager {
                     }
 
                     @Override
-                    public void onError(Throwable throwable) {
-                        callback.onError(throwable);
+                    public void onError() {
+                        callback.onError();
                     }
                 });
             }
 
             @Override
-            public void onError(Throwable throwable) {
-                callback.onError(throwable);
+            public void onError() {
+                callback.onError();
             }
         });
     }
@@ -62,21 +62,24 @@ public class FirebaseUserManager implements UserManager {
     public void getUser(String uid, OnGetUserCallback callback) {
         Task<DocumentSnapshot> task = UserHelper.getUser(mFirestore, uid);
         task.addOnCompleteListener(task1 -> {
-            if (task1.isSuccessful()) {
-                if (task1.getResult().exists()) {
-                    User user = task1.getResult().toObject(User.class);
-                    if (user != null) {
-                        callback.onSuccess(user);
+                    if (task1.isSuccessful()) {
+                        if (task1.getResult().exists()) {
+                            User user = task1.getResult().toObject(User.class);
+                            if (user != null) {
+                                callback.onSuccess(user);
+                            } else {
+                                callback.onError();
+                            }
+                        } else {
+                            callback.onSuccess(new User());
+                        }
                     } else {
-                        callback.onError(new Exception("User not find"));
+                        callback.onError();
                     }
-                } else {
-                    callback.onSuccess(new User());
-                }
-            } else {
-                callback.onError(new Exception("Error get user"));
-            }
-        }).addOnFailureListener(callback::onError);
+                })
+            .addOnFailureListener(task1 -> {
+                callback.onError();
+            });
     }
 
     @Override
@@ -90,9 +93,11 @@ public class FirebaseUserManager implements UserManager {
                 }
                 callback.onSuccess(users);
             } else {
-                callback.onError(new Exception("Error when getting all users for a place"));
+                callback.onError();
             }
-        }).addOnFailureListener(callback::onError);
+        }).addOnFailureListener(task1 -> {
+            callback.onError();
+        });
     }
 
     @Override
@@ -110,13 +115,13 @@ public class FirebaseUserManager implements UserManager {
 
                         callback.onSuccess(user);
                     } else {
-                        callback.onError(new Exception("Error : no user"));
+                        callback.onError();
                     }
                 } else {
-                    callback.onError(new Exception("Error : no result"));
+                    callback.onError();
                 }
             } else {
-                callback.onError(new Exception("Error : task not successful"));
+                callback.onError();
             }
 
         });
@@ -129,9 +134,11 @@ public class FirebaseUserManager implements UserManager {
             if (task1.isSuccessful()) {
                 callback.onSuccess(user);
             } else {
-                callback.onError(new Exception("Error creation of a user"));
+                callback.onError();
             }
-        }).addOnFailureListener(callback::onError);
+        }).addOnFailureListener(task1 -> {
+            callback.onError();
+        });
     }
 
     @Override
@@ -149,15 +156,15 @@ public class FirebaseUserManager implements UserManager {
                     }
 
                     @Override
-                    public void onError(Throwable throwable) {
-                        callback.onError(throwable);
+                    public void onError() {
+                        callback.onError();
                     }
                 });
             }
 
             @Override
-            public void onError(Throwable throwable) {
-                callback.onError(throwable);
+            public void onError() {
+                callback.onError();
             }
         });
     }

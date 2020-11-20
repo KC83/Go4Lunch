@@ -29,6 +29,7 @@
         android:clickable="true"
         android:focusable="true"
         android:src="@drawable/ic_uncheck"
+        android:backgroundTint="@color/colorAccentWhite"
         app:layout_constraintBottom_toBottomOf="@+id/place_activity_place_image"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/place_activity_place_image" />
@@ -45,7 +46,7 @@
         android:drawableEnd="@drawable/ic_star_yellow"
         android:background="@color/colorPrimary"
         android:text="@string/place_name"
-        android:textColor="@color/colorAccent"
+        android:textColor="@color/colorAccentWhite"
         android:textSize="22sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/place_activity_place_image" />
@@ -70,7 +71,7 @@
         android:paddingEnd="10dp"
         android:background="@color/colorPrimary"
         android:text="@string/place_address"
-        android:textColor="@color/colorAccent"
+        android:textColor="@color/colorAccentWhite"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

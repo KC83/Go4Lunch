@@ -16,35 +16,24 @@ import androidx.work.Data;
 import androidx.work.Worker;
 import androidx.work.WorkerParameters;
 
-import com.google.android.libraries.places.api.model.Place;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.messaging.FirebaseMessagingService;
-import com.google.firebase.messaging.RemoteMessage;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.kcapp.go4lunch.MainActivity;
 import com.kcapp.go4lunch.PlaceActivity;
 import com.kcapp.go4lunch.R;
-import com.kcapp.go4lunch.api.places.ApiGooglePlaces;
-import com.kcapp.go4lunch.api.places.PlacesCallback;
-import com.kcapp.go4lunch.api.places.PlacesRepositoryImpl;
 import com.kcapp.go4lunch.api.services.App;
 import com.kcapp.go4lunch.api.services.Constants;
-import com.kcapp.go4lunch.api.services.InternetManager;
-import com.kcapp.go4lunch.api.services.InternetManagerImpl;
 import com.kcapp.go4lunch.di.Injection;
 import com.kcapp.go4lunch.di.manager.UserManager;
 import com.kcapp.go4lunch.model.User;
-import com.kcapp.go4lunch.model.places.GooglePlaceDetailResponse;
-import com.kcapp.go4lunch.model.places.GooglePlacesResponse;
 
 import java.lang.reflect.Type;
 import java.util.List;
 
-public class NotificationService extends Worker {
+public class NotificationWorker extends Worker {
     Context mContext;
 
-    public NotificationService(@NonNull Context context, @NonNull WorkerParameters workerParams) {
+    public NotificationWorker(@NonNull Context context, @NonNull WorkerParameters workerParams) {
         super(context, workerParams);
         mContext = context;
     }
@@ -53,18 +42,34 @@ public class NotificationService extends Worker {
     @Override
     public Result doWork() {
         try {
-            // Get data
-            Data data = getInputData();
-            String placeId = data.getString(Constants.NOTIFICATION_PLACE_ID);
-            String placeName = data.getString(Constants.NOTIFICATION_PLACE_NAME);
-            String placeVicinity = data.getString(Constants.NOTIFICATION_PLACE_VICINITY);
-            String usersJson = data.getString(Constants.NOTIFICATION_USERS_JSON);
+            FirebaseUser firebaseUser = App.getFirebaseUser();
+            if (firebaseUser != null) {
+                // UserManager
+                UserManager firebaseUserManager = Injection.getUserManager();
+                firebaseUserManager.getUser(firebaseUser.getUid(), new UserManager.OnGetUserCallback() {
+                    @Override
+                    public void onSuccess(User user) {
+                        // The user agrees to receive notifications
+                        if (Constants.SEND_NOTIFICATION_TRUE.equals(user.getSendNotification())) {
+                            // Get data
+                            Data data = getInputData();
+                            String placeId = data.getString(Constants.NOTIFICATION_PLACE_ID);
+                            String placeName = data.getString(Constants.NOTIFICATION_PLACE_NAME);
+                            String placeVicinity = data.getString(Constants.NOTIFICATION_PLACE_VICINITY);
+                            String usersJson = data.getString(Constants.NOTIFICATION_USERS_JSON);
 
-            Type listType = new TypeToken<List<User>>() {}.getType();
-            List<User> users = new Gson().fromJson(usersJson,listType);
+                            Type listType = new TypeToken<List<User>>() {}.getType();
+                            List<User> users = new Gson().fromJson(usersJson,listType);
 
-            // Send notification
-            sendNotification(mContext, mContext.getString(R.string.notification_title), getTextNotification(mContext, users, placeName, placeVicinity), placeId);
+                            // Send notification
+                            sendNotification(mContext, mContext.getString(R.string.notification_title), getTextNotification(mContext, users, placeName, placeVicinity), placeId);
+                        }
+                    }
+
+                    @Override
+                    public void onError() {}
+                });
+            }
 
             return Result.success();
         } catch (Throwable throwable) {
@@ -93,8 +98,6 @@ public class NotificationService extends Worker {
         return message.substring(0);
     }
     private void sendNotification(Context context, String title, String message, String placeId) {
-        //Log.d("SEND NOTIFICATION", "SEND NOTIFICATION :: "+title+" // "+message+" // "+placeId);
-
         // The Intent tha will be shown when the user click on the notification
         Intent intent = new Intent(context, PlaceActivity.class);
         intent.putExtra(Constants.PLACE_ID, placeId);

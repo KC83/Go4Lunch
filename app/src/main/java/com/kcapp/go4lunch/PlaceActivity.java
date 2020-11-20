@@ -252,8 +252,8 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback, 
                             }
 
                             @Override
-                            public void onError(Throwable throwable) {
-                                Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            public void onError() {
+                                Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_SHORT).show();
                             }
                         });
                     } else {
@@ -274,8 +274,8 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback, 
                             }
 
                             @Override
-                            public void onError(Throwable throwable) {
-                                Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            public void onError() {
+                                Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_SHORT).show();
                             }
                         });
                     } else {
@@ -288,8 +288,8 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback, 
             }
 
             @Override
-            public void onError(Throwable throwable) {
-                Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
+            public void onError() {
+                Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_SHORT).show();
             }
         });
     }
@@ -338,8 +338,8 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback, 
                             }
 
                             @Override
-                            public void onError(Throwable throwable) {
-                                Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            public void onError() {
+                                Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_SHORT).show();
                             }
                         });
                     } else {
@@ -358,8 +358,8 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback, 
                             }
 
                             @Override
-                            public void onError(Throwable throwable) {
-                                Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
+                            public void onError() {
+                                Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_SHORT).show();
                             }
                         });
                     } else {
@@ -372,8 +372,8 @@ public class PlaceActivity extends AppCompatActivity implements PlacesCallback, 
             }
 
             @Override
-            public void onError(Throwable throwable) {
-                Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_SHORT).show();
+            public void onError() {
+                Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_SHORT).show();
             }
         });
     }
