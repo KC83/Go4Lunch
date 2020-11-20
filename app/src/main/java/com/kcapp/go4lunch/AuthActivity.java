@@ -49,10 +49,12 @@ public class AuthActivity extends AppCompatActivity {
         Button facebookButton = findViewById(R.id.auth_activity_button_login_facebook);
         Button googleButton = findViewById(R.id.auth_activity_button_login_google);
         Button twitterButton = findViewById(R.id.auth_activity_button_login_twitter);
+        Button emailButton = findViewById(R.id.auth_activity_button_login_email);
 
         facebookButton.setOnClickListener(v -> authWithFacebook());
         googleButton.setOnClickListener(v -> authWithGoogle());
         twitterButton.setOnClickListener(v -> authWithTwitter());
+        emailButton.setOnClickListener(v -> authWithEmail());
     }
     private void authWithFacebook() {
         Log.d("TAG", "AuthActivity::authWithFacebook");
@@ -103,6 +105,19 @@ public class AuthActivity extends AppCompatActivity {
                     });
         }
     }
+    private void authWithEmail() {
+        Log.d("TAG", "AuthActivity::authWithEmail");
+
+        List<AuthUI.IdpConfig> providers = Collections.singletonList(new AuthUI.IdpConfig.EmailBuilder().build());
+
+        startActivityForResult(
+                AuthUI.getInstance()
+                        .createSignInIntentBuilder()
+                        .setAvailableProviders(providers)
+                        .setIsSmartLockEnabled(false, true)
+                        .build(),
+                Constants.RC_SIGN_IN);
+    }
 
     private void handleResponseAfterSignIn(int requestCode, int resultCode, Intent data){
         IdpResponse response = IdpResponse.fromResultIntent(data);
@@ -139,11 +154,13 @@ public class AuthActivity extends AppCompatActivity {
 
                     Intent intent = new Intent(getApplicationContext(), MainActivity.class);
                     startActivity(intent);
+
+                    finish();
                 }
 
                 @Override
-                public void onError(Throwable throwable) {
-                    Toast.makeText(getApplicationContext(), throwable.getMessage(), Toast.LENGTH_LONG).show();
+                public void onError() {
+                    Toast.makeText(getApplicationContext(), getString(R.string.error_unknown_error), Toast.LENGTH_LONG).show();
                 }
             });
         }

@@ -58,4 +58,5 @@
     <string name="settings_saved">Settings saved</string>
     <string name="notification_title">You have lunch somewhere this noon</string>
     <string name="button_login_twitter">Sign in with Twiiter</string>
+    <string name="button_login_email">Sign in with an email</string>
 </resources>
